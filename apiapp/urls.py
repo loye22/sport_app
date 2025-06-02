@@ -26,8 +26,9 @@ from . import views
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+   
     path('', views.home, name='home'),  # Add the root URL pattern
+     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),  # Add the URL pattern for the api app
     path('accounts/', include('django.contrib.auth.urls')),
 ]
