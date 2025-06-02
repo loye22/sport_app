@@ -1,0 +1,40 @@
+
+## 📝 Client Feedback
+
+1. Add a Review system for users to rate events and hosts.(add rate var for the host defalt is 0 )
+4. Integrate ads into Events and Posts.
+
+
+## Chat Feature
+2. Enable sending voice messages in the chat.  
+
+
+## New Features
+1. Set up an automatic event status update: check event end times hourly and mark them as "Completed" if past. 
+2. Integrate Google Login functionality.
+3. Integrate Facebook Login functionality.
+
+
+
+## inhansment
+
+7. Fix the issue with passing categories to the screen details.
+9. make sure to add the permesstion to selct voice in IOS ... 
+
+
+
+
+
+
+
+##### TO SHOW MY CHANGES ##########
+## 📝 Client Feedback
+1. Update the Home Page UI to include vendor information.  
+3. Enable the host to remove (kick) any participant from an event.  
+4. Implement a "Didn't Show" penalty flag for users who miss a game without notice.  
+5. Add a Review system for users to rate events and hosts.  
+7. Replace "Booking" with "Post Now", remove the price field, and add Terms & Conditions — users must book the venue before posting.  
+8. Integrate ads into Events and Posts.
+
+
+

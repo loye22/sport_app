@@ -1,0 +1,263 @@
+Models after normalization 
+
+interface User {
+    id: string;                           // Unique ID for the user
+    fullName: string;                     // e.g., "Osmine Monarch"
+    gender: "Male" | "Female";            // Gender
+    birthDate: Date;                      // Date of birth
+    email: email;                        // Email address
+    phoneNumber: string;                  // Phone number
+    address: GeoLocation;                 // Geolocation object
+    profilePicture: string;               // URL/path of the profile picture
+    followers: User[];                  // List of user IDs following this user
+    following: User[];                  // List of user IDs this user is following
+    posts: Post[];                        // Posts created by this user
+    groupChats: GroupChat[];              // Group chats the user is part of
+    events: Event[];                      // Events hosted by the user
+    notifications: Notification[];        // Notifications for the user
+    createdAt: Date.now ;                      // Timestamp when the user was created
+}
+
+interface GeoLocation {
+    latitude: number;                     // Latitude of the address
+    longitude: number;                    // Longitude of the address
+}
+
+
+interface GroupChat {
+    id: string;                           // Unique ID for the group chat
+    name: string;                         // Name of the group chat
+    members: USers [];                    // Array of user IDs in the group chat
+    messages: ChatMessage[];              // Array of messages in the group chat
+    createdAt: Date;                      // Timestamp when the group chat was created
+}
+
+interface ChatMessage {
+    senderId: User;                     // ID of the sender
+    content: string;                      // Content of the message
+    timestamp: Date;                      // Timestamp of the message
+}
+
+
+interface Event {
+    id: string;                           // Unique event ID
+    title: string;                        // Event title, e.g., "Sunday Morning Football"
+    image: image ;                        // URL or path to event image
+    tag: Categories;                          // Event tag, e.g., "Football"
+    date: Date;                           // Event date
+    time: time;                         // Event time
+    location: GeoLocation;                // Event location coordinates
+    description: string;                  // Event description
+    hostId: User;                       // ID of the user hosting the event
+    members: Users[];                    // List of user IDs attending the event
+    status: "Available" | "Pending" | "Cancelled" | "Completed";  // Event status
+    price: number;                        // Price to attend the event
+    maxMembers: number;                   // Maximum number of participants
+    cancellationReason: string | null;    // Reason for cancellation (if applicable)
+    userResults:[{User : "win" | "loss" | "draw" }]  
+    additionalOptions: AdditionalOption[]; // Additional services for the event
+}
+
+interface AdditionalOption {
+    type: "referee" | "medical_officer";   // Type of service (e.g., referee)
+    price: number;                        // Price of the service
+    description: string;                  // Description of the service
+    image: image ;                        // URL or path to the service image
+}
+
+
+
+
+interface Venue {
+    id: string;                           // Unique venue ID
+    title: string;                        // Venue title
+    location: GeoLocation;                // Venue location coordinates
+    address: string;                      // Address of the venue
+    image: image ;                        // URL or path to the venue image
+    description: string;                  // Venue description
+    category: Category;                     // Venue category, e.g., "Football"
+    createdById: User;                  // ID of the user who created the venue
+    status: "Available" | "Maintenance";   // Venue status
+}
+
+interface Post {
+    id: string;                            // Unique post ID
+    activityName: string;                  // Name of the activity (e.g., "Football Game")
+    scores: string;                      // List of scores related to the activity
+    possession: string;                    // Description of possession details
+    fouls: string[];                       // Array of fouls or descriptions
+    category: Category[];                  // Categories associated with the post
+    hashtags: Hashtag[];                   // List of hashtags
+    createdById: User ;                   // ID of the user who created the post
+    createdAt: Date.now;                       // Timestamp of when the post was created
+    participants: Users[];                // List of participants' user IDs
+    isPublished: boolean;                  // Whether the post is published or saved as draft
+    comments: Comment[];                   // List of comments on the post
+    likes: number ;                       // List of user IDs who liked the post
+}
+
+interface Comment {
+    id: string;                            // Unique comment ID
+    content: string;                       // Content of the comment
+    createdById: User;                   // ID of the user who created the comment
+    createdAt: Date.now() ;                       // Timestamp of when the comment was created
+}
+
+interface Hashtag {
+    id: string;                            // Unique hashtag ID
+    name: string;                          // Name of the hashtag (e.g., #Football)
+}
+
+interface Category {
+    id: string;                            // Unique category ID
+    name: string;                          // Name of the category (e.g., "Sports", "Fitness")
+}
+
+
+
+
+Models 
+
+1. user 
+interface User {
+    fullName: string;                     // e.g., "Osmine Monarch"
+    gender: "Male" | "Female";            // Gender field
+    birthDate: Date;                      // Date of birth
+    email: string;                        // Email address
+    phoneNumber: string;                  // Phone number
+    address: GeoLocation;                 // Address with latitude and longitude
+    followers: string[];                  // Array of user IDs who follow this user
+    following: string[];                  // Array of user IDs this user follows
+    messageHistory: Message[];            // Array of message objects
+    groupChats: GroupChat[];              // Array of group chat objects
+    posts: Post[];                        // Array of post objects
+    events: Event[];                      // Array of event objects
+    venues: Venue[];                      // Array of venue objects
+    notifications: Notification[];        // Array of notification objects
+    profilePicture: string;               // URL or path to the profile picture
+    reposts:{Post[] , Hashtag , image , Comment } ;                      // Array of reposted posts
+}
+
+interface GroupChat {
+    id: string;                           // Unique ID for the group chat
+    name: string;                         // Name of the group chat
+    members: User[];                      // Array of users in the group chat
+    messages: ChatMessage[];              // Array of messages in the group chat
+}
+
+interface GeoLocation {
+  latitude: number;                     // Latitude of the address
+  longitude: number;                    // Longitude of the address
+}
+
+interface Message {
+  chatId: string;                       // Unique ID for the chat
+  messages: ChatMessage[];              // Array of messages in the chat
+}
+
+interface ChatMessage {
+  senderId: string;                     // ID of the sender
+  receiverId: string;                   // ID of the receiver
+  content: string;                      // Content of the message
+  timestamp: Date;                      // Timestamp of the message
+}
+
+// Hashtag Model
+interface Hashtag {
+  id: string;             // Unique ID for each hashtag
+  name: string;           // Name of the hashtag (e.g., #Football, #Basketball)
+}
+
+// Category Model
+interface Category {
+  id: string;             // Unique ID for each category
+  name: string;           // Name of the category (e.g., "Sports", "Entertainment")
+}
+
+
+2. Event 
+interface Event {
+  id: string;                           // Unique event ID
+  title: string;                        // Event title, e.g., "Sunday Morning Football"
+  image: string;                        // URL or path to the event image
+  tag: string;                          // Event tag, e.g., "Football"
+  date: Date;                           // Event date
+  time: string;                         // Event time
+  field: string;                        // Field or venue name
+  location: GeoLocation;                // Event location coordinates
+  description: string;                  // Event description
+  host: User;                           // Event host (a User object)
+  members: User[];                      // List of event members (array of Users)
+  event_status: boolean ;  // Event status
+  approved: "Available" |"Pending Confirmation" | "Cancelled" | "Completed " ;                    // Approval status (true/false)
+  paid: boolean;                        // Payment status (true/false)
+  price: number;                        // Event price
+  maxMembers: number;                   // Maximum number of members allowed
+  cancellationReason: string;           // Reason for event cancellation
+  userResults: { [userId: string]: 'win' | 'loss' | 'draw' };   // Track win/loss/draw for each user
+    additionalOptions: AdditionalOption[]; // Array of additional services
+
+
+
+}
+
+3. additional option 
+interface AdditionalOption {
+  type:string  #"referee" | "medical_officer";  // Type of service
+  price: number;                        // Price of the service
+  description: string;                  // Description of the service}
+  image : string;                       // URL or path to the service image
+} 
+
+
+4. venue 
+interface Venue {
+    id: string;                           // Unique venue ID
+    title: string;                        // Venue title
+    location: GeoLocation;                // Venue location coordinates
+    address: string;                      // Venue address
+    image: string;                        // URL or path to the venue image
+    description: string;                  // Venue description
+    category: string;                     // Venue category, e.g., "Football"
+    fields: Field[];                      // Array of fields available at the venue
+    createdBy: User;                      // User who created the venue
+    status: "Available" | "Maintenance" ; // Venue status
+}
+
+interface Field {
+    id: string;                           // Unique field ID
+    title: string;                        // Field title
+    price: number;                        // Price per hour
+    image: string;                        // URL or path to the field image
+    description: string;                  // Field description
+    additionalOptions: AdditionalOption[]; // Array of additional options for the field
+    createdBy: User;                      // User who created the field
+}
+
+5. post 
+
+
+// Updated Post Model
+interface Post {
+  id: string;                            // Unique post ID
+  activityName: string;                  // Name of the activity
+  scores: string;                      // Array of scores related to the activity
+  possession: string;                    // Description of possession details
+  fouls: string;                       // Array of fouls or descriptions of fouls
+  category: Category[];                    // Category object for the post
+  hashtags: Hashtag[];                   // Array of Hashtag objects
+  createdBy: User;                       // User who created the post
+  createdAt: Date;                       // Timestamp of when the post was created                      // Optional poll (if included in the post)
+  participants: User[];                  // List of participants tagged in the post
+  isPublished: boolean;                  // Whether the post is published or saved as draft
+    comments: Comment[];                   // Array of comments on the post
+    likes: numbers ;                         // Array of users who liked the post
+}
+
+interface Comment {
+  id: string;            // Unique comment ID
+  content: string;       // Content of the comment
+  createdBy: User;       // User who created the comment
+  createdAt: Date;       // Timestamp of when the comment was created
+}
+ 
