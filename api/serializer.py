@@ -131,6 +131,37 @@ class EventSerializer(serializers.ModelSerializer):
             host_details = serializers.SerializerMethodField(read_only=True)
             team_a_members = UserProfileSerializer(many=True, read_only=True)
             team_b_members = UserProfileSerializer(many=True, read_only=True)
+            #Venue = VenueSerializer(read_only=True)
+               # For output: nested venue details
+            venue_details = VenueSerializer(source="Venue", read_only=True)
+    
+            # For input: allow the client to send a venue's PK
+            Venue = serializers.PrimaryKeyRelatedField(
+                queryset=Venue.objects.filter(status='Available')
+            )
+            
+
+            class Meta:
+                model = Event
+                fields = ('__all__')
+                read_only_fields = ['host']
+            def get_host_details(self, obj):
+                if obj.host:
+                    return {
+                        'id': obj.host.id,
+                        'full_name': obj.host.full_name,
+                        'profile_picture': obj.host.profile_picture  # Assuming this field holds the URL
+                    }
+                return None
+
+
+
+
+
+class EventSerializerEvent(serializers.ModelSerializer):
+            host_details = serializers.SerializerMethodField(read_only=True)
+            team_a_members = UserProfileSerializer(many=True, read_only=True)
+            team_b_members = UserProfileSerializer(many=True, read_only=True)
             venue_details = VenueSerializer(source="Venue", read_only=True)
     
             Venue = serializers.PrimaryKeyRelatedField(
@@ -177,6 +208,7 @@ class EventSerializer(serializers.ModelSerializer):
                             'full_name': obj.host.full_name,
                             'profile_picture': obj.host.profile_picture.url if obj.host.profile_picture else None
                         }
+        
                     return None
                 except Exception as e:
                     return {
@@ -192,7 +224,8 @@ class EventSerializer(serializers.ModelSerializer):
                         raise serializers.ValidationError({
                             'end_time': 'End time must be after start time.'
                         })
-                return data
+                return data                
+            
 
 
 class JoinEventSerializer(serializers.Serializer):

@@ -3,7 +3,7 @@ from rest_framework.generics import ListAPIView
 from datetime import datetime, timedelta
 from apiapp.settings import DEFAULT_FROM_EMAIL
 from .models import Review ,NoShow ,RepostComment , Repost ,AdditionalOption, EventCancellation ,  UserProfile, Category, Post, Comment , Event , Notification , Venue , Hashtag
-from .serializer import NotificationSerializer ,SearchUserSerializer ,SearchRequestSerializer, EventWithStatsSerializer ,UserProfileDetailSerializer ,RepostCommentSerializer , EventOverlapSerializer  ,CopyEventSerializer  ,HashtagSerializer ,  CategorySerializer,  CancelJoinEventSerializer ,UserProfileSerializer, VenueSerializer, PostSerializer, CommentSerializer , EventSerializer , JoinEventSerializer , UnfollowUserSerializer, RepostSerializer
+from .serializer import EventSerializerEvent , NotificationSerializer ,SearchUserSerializer ,SearchRequestSerializer, EventWithStatsSerializer ,UserProfileDetailSerializer ,RepostCommentSerializer , EventOverlapSerializer  ,CopyEventSerializer  ,HashtagSerializer ,  CategorySerializer,  CancelJoinEventSerializer ,UserProfileSerializer, VenueSerializer, PostSerializer, CommentSerializer , EventSerializer , JoinEventSerializer , UnfollowUserSerializer, RepostSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -61,7 +61,7 @@ class MyEventsView(APIView):
             Q(team_b_members=user_profile)
         ).distinct()
 
-        serializer = EventSerializer(events, many=True)
+        serializer = EventSerializerEvent(events, many=True)
         print("serializer.data")
         print(len(serializer.data));
         return Response(serializer.data, status=status.HTTP_200_OK)
