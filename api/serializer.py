@@ -131,29 +131,68 @@ class EventSerializer(serializers.ModelSerializer):
             host_details = serializers.SerializerMethodField(read_only=True)
             team_a_members = UserProfileSerializer(many=True, read_only=True)
             team_b_members = UserProfileSerializer(many=True, read_only=True)
-            #Venue = VenueSerializer(read_only=True)
-               # For output: nested venue details
             venue_details = VenueSerializer(source="Venue", read_only=True)
     
-            # For input: allow the client to send a venue's PK
             Venue = serializers.PrimaryKeyRelatedField(
-                queryset=Venue.objects.filter(status='Available')
+                queryset=Venue.objects.filter(status='Available'),
+                error_messages={
+                    'does_not_exist': 'The selected venue does not exist or is not available.',
+                    'invalid': 'Please select a valid venue.'
+                }
             )
-            
 
             class Meta:
                 model = Event
                 fields = ('__all__')
                 read_only_fields = ['host']
-            def get_host_details(self, obj):
-                if obj.host:
-                    return {
-                        'id': obj.host.id,
-                        'full_name': obj.host.full_name,
-                        'profile_picture': obj.host.profile_picture  # Assuming this field holds the URL
+                error_messages = {
+                    'title': {
+                        'required': 'Event title is required.',
+                        'blank': 'Event title cannot be empty.'
+                    },
+                    'date': {
+                        'required': 'Event date is required.',
+                        'invalid': 'Please enter a valid date.'
+                    },
+                    'start_time': {
+                        'required': 'Start time is required.',
+                        'invalid': 'Please enter a valid start time.'
+                    },
+                    'end_time': {
+                        'required': 'End time is required.',
+                        'invalid': 'Please enter a valid end time.'
+                    },
+                    'max_members': {
+                        'required': 'Maximum number of members is required.',
+                        'min_value': 'Maximum members must be at least 2.',
+                        'invalid': 'Please enter a valid number for maximum members.'
                     }
-                return None
-            
+                }
+
+            def get_host_details(self, obj):
+                try:
+                    if obj.host:
+                        return {
+                            'id': obj.host.id,
+                            'full_name': obj.host.full_name,
+                            'profile_picture': obj.host.profile_picture.url if obj.host.profile_picture else None
+                        }
+                    return None
+                except Exception as e:
+                    return {
+                        'id': obj.host.id if obj.host else None,
+                        'full_name': obj.host.full_name if obj.host else None,
+                        'profile_picture': None,
+                        'error': 'Unable to load profile picture'
+                    }
+
+            def validate(self, data):
+                if 'start_time' in data and 'end_time' in data:
+                    if data['start_time'] >= data['end_time']:
+                        raise serializers.ValidationError({
+                            'end_time': 'End time must be after start time.'
+                        })
+                return data
 
 
 class JoinEventSerializer(serializers.Serializer):
