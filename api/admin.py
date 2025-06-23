@@ -69,7 +69,7 @@ class GroupChatAdmin(admin.ModelAdmin):
 
 
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('id' , 'user', 'content', 'timestamp', 'read_status')
+    list_display = ('id' , 'sender', 'user', 'content', 'timestamp', 'read_status')
     search_fields = ('user__full_name', 'content')
     list_filter = ('read_status', 'timestamp')
     ordering = ('-timestamp',)

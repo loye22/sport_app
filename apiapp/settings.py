@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-$!9s)3v3zh%+imqfb_v7amm0pp$pqve3z=h6h(tpzhb2*!hnm7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.130' , '127.0.0.1','localhost' , '157.180.127.178', 'squad-links.com' , 'www.squad-links.com' ]
+ALLOWED_HOSTS = ['192.168.1.130' , '127.0.0.1','localhost' , '157.180.127.178', 'squad-links.com' , 'www.squad-links.com'  ,'10.0.2.2' ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 

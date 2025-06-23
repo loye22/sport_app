@@ -395,10 +395,26 @@ class SearchUserSerializer(serializers.ModelSerializer):
             return obj in requester_profile.following.all()  # Check if the user is in the requester's following list
         return False
     
+# class NotificationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Notification
+#         fields = ['id', 'content', 'timestamp', 'read_status']
+
+
+class UserProfileMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['id', 'profile_picture']
+        
+
 class NotificationSerializer(serializers.ModelSerializer):
+    user = UserProfileMiniSerializer(read_only=True)    # receiver
+    sender = UserProfileMiniSerializer(read_only=True)  # sender
+
     class Meta:
         model = Notification
-        fields = ['id', 'content', 'timestamp', 'read_status']
+        fields = ['id', 'user', 'sender', 'content', 'timestamp', 'read_status']
+
 
 def x():
     pass

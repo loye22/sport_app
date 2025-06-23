@@ -24,6 +24,7 @@ import uuid
 from django.contrib.auth.forms import PasswordResetForm
 from rest_framework.permissions import AllowAny
 from django.db.models import Avg
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 
 
@@ -179,44 +180,84 @@ class LoginView(APIView):
     
         
 
+# class FollowUserView(APIView):
+#     permission_classes = [IsAuthenticated]
+    
+#     def post(self, request, *args, **kwargs):
+#         user_to_follow_id = request.data.get('user_to_follow_id')
+#         sender_id = request.data.get('sender_id')
+
+#         if not user_to_follow_id:
+#             return Response({'error': 'user_to_follow_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+#         if not sender_id:
+#             return Response({'error': 'sender_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+#         try:
+#             sender = UserProfile.objects.get(id=sender_id)
+#         except UserProfile.DoesNotExist:
+#             return Response({'error': 'Sender not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+#         try:
+#             user_to_follow = UserProfile.objects.get(id=user_to_follow_id)
+#         except UserProfile.DoesNotExist:
+#             return Response({'error': 'User to follow not found.'}, status=status.HTTP_404_NOT_FOUND)
+#         except Exception as e:
+#             return Response({'error': f'Unexpected error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#         try:
+#             sender.following.add(user_to_follow)
+#             user_to_follow.followers.add(sender)
+            
+#             # Send notification to the user being followed, with sender info
+#             Notification.objects.create(
+#                 user=user_to_follow,
+#                 sender=sender,
+#                 content=f"{sender.full_name} has followed you."
+#             )
+            
+#             return Response({'status': 'User followed successfully'}, status=status.HTTP_200_OK)
+#         except Exception as e:
+#             return Response({'error': f'Unable to follow user: {str(e)}'},
+#                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class FollowUserView(APIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, request, *args, **kwargs):
-        # Only get user_to_follow_id from the POST data
         user_to_follow_id = request.data.get('user_to_follow_id')
-        
+
         if not user_to_follow_id:
             return Response({'error': 'user_to_follow_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         try:
-            # Get logged in user's profile directly from request.user
-            user = request.user.userprofile
+            sender = request.user.userprofile
         except UserProfile.DoesNotExist:
-            return Response({'error': 'Logged in user profile not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
+            return Response({'error': 'Sender (authenticated user) not found.'}, status=status.HTTP_404_NOT_FOUND)
+
         try:
-            # Get the profile of the user to follow by its ID
             user_to_follow = UserProfile.objects.get(id=user_to_follow_id)
         except UserProfile.DoesNotExist:
             return Response({'error': 'User to follow not found.'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error': f'Unexpected error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
         try:
-            user.following.add(user_to_follow)
-            user_to_follow.followers.add(user)
+            sender.following.add(user_to_follow)
+            user_to_follow.followers.add(sender)
             
-            # Send notification to the user being followed
+            # Send notification to the user being followed, with sender info
             Notification.objects.create(
                 user=user_to_follow,
-                content=f"{user.full_name} has followed you."
+                sender=sender,
+                content=f"{sender.full_name} has followed you."
             )
             
             return Response({'status': 'User followed successfully'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': f'Unable to follow user: {str(e)}'},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class LikePostView(APIView):
     permission_classes = [IsAuthenticated]
@@ -1383,7 +1424,8 @@ class NotificationListView(APIView):
         except UserProfile.DoesNotExist:
             return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        notifications = Notification.objects.filter(user=user_profile).order_by('-timestamp')
+        #notifications = Notification.objects.filter(user=user_profile).order_by('-timestamp')
+        notifications = Notification.objects.filter(user=user_profile, sender__isnull=False).order_by('-timestamp')
         serializer = NotificationSerializer(notifications, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -1968,6 +2010,46 @@ class AddReviewView(APIView):
         except Exception as e:
             return Response({'error': f'An unexpected error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+
+
+
+
+class CreateNewCategoryView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
     
+    def post(self, request, *args, **kwargs):
+        # Check if name is provided
+        if 'name' not in request.data or not request.data['name']:
+            return Response(
+                {'error': 'Category name is required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        # Create a copy of the data to modify
+        data = request.data.copy()
+        
+        # If no image is provided, create a default image
+        if 'image' not in data:
+            # Create a simple text file as a default image
+            from django.core.files.base import ContentFile
+            from PIL import Image
+            import io
+            
+            # Create a blank image
+            img = Image.new('RGB', (100, 100), color='white')
+            img_io = io.BytesIO()
+            img.save(img_io, 'PNG')
+            img_io.seek(0)
+            
+            # Create a ContentFile from the image
+            data['image'] = ContentFile(img_io.getvalue(), name='default_category.png')
+            
+        serializer = CategorySerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 def index(request):
     pass 

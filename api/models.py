@@ -66,6 +66,8 @@ class Notification(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     read_status = models.BooleanField(default=False)
+    sender = models.ForeignKey(UserProfile, on_delete=PROTECT, related_name='sent_notifications', null=True, blank=True)
+
 
     def __str__(self):
         return f"Notification for {self.user.full_name} at {self.timestamp}"

@@ -1,6 +1,6 @@
 from django.urls import path, include
 from django.urls import path
-from .views import AddReviewView ,GetUserAverageReviewView ,GetUserAbsenceFlagView ,KickUserFromEventView ,CreateNoShowView ,GetUserEventProfileByIDView ,GetUserEventsByIDView ,GetUserPostsAndRepostsByIDView , GetUserInfoTabStatsByIDView ,GetUserProfileByIDView , PasswordResetRequestView , MarkNotificationsReadView, NotificationListView ,GetFollowersAndFollowingView, GetUserByIDView ,GetCurrentUserIDView ,SearchAPIView ,AllEventsView , UserCategoryStatsView , UserEventProfile ,UserRepostsView , UserPostsView , UserProfileTapDetailView ,ReportRepostView , LikeRepostCommentView ,AddRepostCommentView, LikeRepostView ,RepostCommentListView , RepostListView , AddRepostView , AddCommentView , LikeCommentView, CommentListView , CreatePostAPIView , UserProfileListAPIView , CreateVenueAPIView , MyHostedEventsView, CopyEventView ,CheckDateView,UserProfileDetailView , MyEventsView  ,HashtagListCreateView ,  VenueView,PostView , CommentView , ReportPostView , SignupView , LoginView , FollowUserView , LikePostView , EventView , JoinEventView , CancelJoinEventView , UnfollowUserView  , FileUploadView ,   CategoryListView
+from .views import CreateNewCategoryView ,AddReviewView ,GetUserAverageReviewView ,GetUserAbsenceFlagView ,KickUserFromEventView ,CreateNoShowView ,GetUserEventProfileByIDView ,GetUserEventsByIDView ,GetUserPostsAndRepostsByIDView , GetUserInfoTabStatsByIDView ,GetUserProfileByIDView , PasswordResetRequestView , MarkNotificationsReadView, NotificationListView ,GetFollowersAndFollowingView, GetUserByIDView ,GetCurrentUserIDView ,SearchAPIView ,AllEventsView , UserCategoryStatsView , UserEventProfile ,UserRepostsView , UserPostsView , UserProfileTapDetailView ,ReportRepostView , LikeRepostCommentView ,AddRepostCommentView, LikeRepostView ,RepostCommentListView , RepostListView , AddRepostView , AddCommentView , LikeCommentView, CommentListView , CreatePostAPIView , UserProfileListAPIView , CreateVenueAPIView , MyHostedEventsView, CopyEventView ,CheckDateView,UserProfileDetailView , MyEventsView  ,HashtagListCreateView ,  VenueView,PostView , CommentView , ReportPostView , SignupView , LoginView , FollowUserView , LikePostView , EventView , JoinEventView , CancelJoinEventView , UnfollowUserView  , FileUploadView ,   CategoryListView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 
@@ -64,6 +64,7 @@ urlpatterns = [
             path('get_user_absence_flag/', GetUserAbsenceFlagView.as_view(), name='get-user-absence-flag'),
             path('get_user_average_review/', GetUserAverageReviewView.as_view(), name='get-user-average-review'),
             path('add_review/', AddReviewView.as_view(), name='add-review'),
+            path('add_new_category/', CreateNewCategoryView.as_view(), name='add-new-category')
 
 
 
