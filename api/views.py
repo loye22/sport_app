@@ -25,6 +25,8 @@ from django.contrib.auth.forms import PasswordResetForm
 from rest_framework.permissions import AllowAny
 from django.db.models import Avg
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from django.db import models 
+
 
 
 
@@ -2050,6 +2052,18 @@ class CreateNewCategoryView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class IncreaseAllViewsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Increment views for all posts
+        Post.objects.all().update(views=models.F('views') + 1)
+        # Increment views for all reposts
+        Repost.objects.all().update(views=models.F('views') + 1)
+        return Response({'status': 'All post and repost views incremented by 1.'}, status=status.HTTP_200_OK)
+
 
 def index(request):
     pass 

@@ -52,7 +52,8 @@ class UserProfile(models.Model):
     latitude = models.FloatField(null=True, blank=True)   # New field: User latitude
     longitude = models.FloatField(null=True, blank=True)  # New field: User longitude
     average_host_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
-
+    saved_posts = models.ManyToManyField('Post', related_name='saved_by_users', blank=True)
+    saved_reposts = models.ManyToManyField('Repost', related_name='saved_by_users', blank=True)
 
 
 
@@ -247,6 +248,7 @@ class Post(models.Model):
     body_text = models.TextField(null=True, blank=True)
     report_reason = models.TextField(null=True, blank=True)
     share_counter = models.PositiveIntegerField(default=0)
+    views = models.PositiveIntegerField(default=0)
 
 
 
@@ -288,6 +290,7 @@ class Repost(models.Model):
     share_counter = models.PositiveIntegerField(default=0)
     Likes  = models.PositiveIntegerField(default=0)
     liked_by = models.ManyToManyField(UserProfile, related_name='liked_reposts', blank=True)
+    views = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"Repost of {self.original_post.activity_name} by {self.user.full_name}"
