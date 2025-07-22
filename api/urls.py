@@ -1,6 +1,6 @@
 from django.urls import path, include
 from django.urls import path
-from .views import CheckEmailExistsView ,SaveRepostView ,SavePostView , IncreaseAllViewsAPIView, CreateNewCategoryView ,AddReviewView ,GetUserAverageReviewView ,GetUserAbsenceFlagView ,KickUserFromEventView ,CreateNoShowView ,GetUserEventProfileByIDView ,GetUserEventsByIDView ,GetUserPostsAndRepostsByIDView , GetUserInfoTabStatsByIDView ,GetUserProfileByIDView , PasswordResetRequestView , MarkNotificationsReadView, NotificationListView ,GetFollowersAndFollowingView, GetUserByIDView ,GetCurrentUserIDView ,SearchAPIView ,AllEventsView , UserCategoryStatsView , UserEventProfile ,UserRepostsView , UserPostsView , UserProfileTapDetailView ,ReportRepostView , LikeRepostCommentView ,AddRepostCommentView, LikeRepostView ,RepostCommentListView , RepostListView , AddRepostView , AddCommentView , LikeCommentView, CommentListView , CreatePostAPIView , UserProfileListAPIView , CreateVenueAPIView , MyHostedEventsView, CopyEventView ,CheckDateView,UserProfileDetailView , MyEventsView  ,HashtagListCreateView ,  VenueView,PostView , CommentView , ReportPostView , SignupView , LoginView , FollowUserView , LikePostView , EventView , JoinEventView , CancelJoinEventView , UnfollowUserView  , FileUploadView ,   CategoryListView
+from .views import GetSavedItemsView , CheckEmailExistsView ,SaveRepostView ,SavePostView , IncreaseAllViewsAPIView, CreateNewCategoryView ,AddReviewView ,GetUserAverageReviewView ,GetUserAbsenceFlagView ,KickUserFromEventView ,CreateNoShowView ,GetUserEventProfileByIDView ,GetUserEventsByIDView ,GetUserPostsAndRepostsByIDView , GetUserInfoTabStatsByIDView ,GetUserProfileByIDView , PasswordResetRequestView , MarkNotificationsReadView, NotificationListView ,GetFollowersAndFollowingView, GetUserByIDView ,GetCurrentUserIDView ,SearchAPIView ,AllEventsView , UserCategoryStatsView , UserEventProfile ,UserRepostsView , UserPostsView , UserProfileTapDetailView ,ReportRepostView , LikeRepostCommentView ,AddRepostCommentView, LikeRepostView ,RepostCommentListView , RepostListView , AddRepostView , AddCommentView , LikeCommentView, CommentListView , CreatePostAPIView , UserProfileListAPIView , CreateVenueAPIView , MyHostedEventsView, CopyEventView ,CheckDateView,UserProfileDetailView , MyEventsView  ,HashtagListCreateView ,  VenueView,PostView , CommentView , ReportPostView , SignupView , LoginView , FollowUserView , LikePostView , EventView , JoinEventView , CancelJoinEventView , UnfollowUserView  , FileUploadView ,   CategoryListView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 
@@ -68,6 +68,7 @@ urlpatterns = [
             path('increase_all_views/', IncreaseAllViewsAPIView.as_view(), name='increase-all-views'),
             path('save_post/', SavePostView.as_view(), name='save-post'),
             path('save_repost/', SaveRepostView.as_view(), name='save-repost'),
+            path('get_saved_items/', GetSavedItemsView.as_view(), name='get-saved-items'),
             path('check_email_exists/', CheckEmailExistsView.as_view(), name='check-email-exists'),
 
 

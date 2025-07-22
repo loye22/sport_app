@@ -2167,5 +2167,28 @@ class CheckEmailExistsView(APIView):
         exists = user_exists or userprofile_exists
         return Response({'exists': exists}, status=status.HTTP_200_OK)
 
+
+
+class GetSavedItemsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            user_profile = request.user.userprofile
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'User profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        saved_posts = user_profile.saved_posts.filter(is_reported=False, is_published=True)
+        saved_reposts = user_profile.saved_reposts.filter(is_reported=False)
+
+        post_serializer = PostSerializer(saved_posts, many=True, context={'request': request})
+        repost_serializer = RepostSerializer(saved_reposts, many=True, context={'request': request})
+
+        return Response({
+            'post': post_serializer.data,
+            'repost': repost_serializer.data
+        }, status=status.HTTP_200_OK)
+
+
 def index(request):
     pass 
