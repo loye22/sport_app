@@ -14,7 +14,7 @@ class UserProfileAdmin(admin.ModelAdmin):
     search_fields = ('full_name', 'email', 'phone_number' )
     list_filter = ('gender', 'created_at')
     ordering = ('-created_at',)
-    filter_horizontal = ("followers","following", )  # Add this line to display the followers field as a horizontal filter
+    filter_horizontal = ("followers","following","saved_posts","saved_reposts")  # Add this line to display the followers field as a horizontal filter
    
 
 

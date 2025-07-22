@@ -253,6 +253,8 @@ class RepostSerializer(serializers.ModelSerializer):
     hashtags = HashtagSerializer(many=True, read_only=True)
     isLiked = serializers.SerializerMethodField(read_only=True)
     comment_counter = serializers.SerializerMethodField(read_only=True)
+    is_saved = serializers.SerializerMethodField(read_only=True)  # <-- Add this line
+
 
     class Meta:
         model = Repost
@@ -266,6 +268,14 @@ class RepostSerializer(serializers.ModelSerializer):
 
     def get_comment_counter(self, obj):
         return RepostComment.objects.filter(repost=obj).count()
+    
+    def get_is_saved(self, obj):
+        request = self.context.get('request')
+        if request and hasattr(request, 'user') and request.user.is_authenticated:
+            user_profile = getattr(request.user, 'userprofile', None)
+            if user_profile:
+                return user_profile.saved_reposts.filter(id=obj.id).exists()
+        return False    
 
 
 

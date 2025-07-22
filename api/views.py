@@ -26,6 +26,8 @@ from rest_framework.permissions import AllowAny
 from django.db.models import Avg
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.db import models 
+from rest_framework.permissions import AllowAny
+from django.contrib.auth.models import User
 
 
 
@@ -2064,6 +2066,106 @@ class IncreaseAllViewsAPIView(APIView):
         Repost.objects.all().update(views=models.F('views') + 1)
         return Response({'status': 'All post and repost views incremented by 1.'}, status=status.HTTP_200_OK)
 
+
+class SavePostView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        post_id = request.data.get('post_id')
+
+        if not post_id:
+            return Response({'error': 'post_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+        # Validate UUID format
+        try:
+            uuid.UUID(post_id, version=4)
+        except ValueError:
+            return Response({'error': 'Invalid post_id format. Must be a valid UUID.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return Response({'error': 'Post not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return Response({'error': 'Post not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            user_profile = request.user.userprofile
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'User profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Toggle save status
+        if user_profile.saved_posts.filter(id=post_id).exists():
+            # Post is already saved, so unsave it
+            user_profile.saved_posts.remove(post)
+            return Response({'status': 'Post unsaved successfully.'}, status=status.HTTP_200_OK)
+        else:
+            # Post is not saved, so save it
+            user_profile.saved_posts.add(post)
+            return Response({'status': 'Post saved successfully.'}, status=status.HTTP_200_OK)
+
+
+class SaveRepostView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        repost_id = request.data.get('repost_id')
+
+        if not repost_id:
+            return Response({'error': 'repost_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate UUID format
+        try:
+            uuid.UUID(repost_id, version=4)
+        except ValueError:
+            return Response({'error': 'Invalid repost_id format. Must be a valid UUID.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            repost = Repost.objects.get(id=repost_id)
+        except Repost.DoesNotExist:
+            return Response({'error': 'Repost not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            user_profile = request.user.userprofile
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'User profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Toggle save status
+        if user_profile.saved_reposts.filter(id=repost_id).exists():
+            # Repost is already saved, so unsave it
+            user_profile.saved_reposts.remove(repost)
+            return Response({'status': 'Repost unsaved successfully.'}, status=status.HTTP_200_OK)
+        else:
+            # Repost is not saved, so save it
+            user_profile.saved_reposts.add(repost)
+            return Response({'status': 'Repost saved successfully.'}, status=status.HTTP_200_OK)
+
+
+
+
+
+
+class CheckEmailExistsView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        if not email:
+            return Response({'error': 'Email is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        # Check in both User and UserProfile (in case of different registration logic)
+        user_exists = User.objects.filter(email=email).exists()
+        userprofile_exists = False
+        try:
+            from .models import UserProfile
+            userprofile_exists = UserProfile.objects.filter(email=email).exists()
+        except Exception:
+            pass
+        exists = user_exists or userprofile_exists
+        return Response({'exists': exists}, status=status.HTTP_200_OK)
 
 def index(request):
     pass 
