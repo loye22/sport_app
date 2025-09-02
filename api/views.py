@@ -1430,7 +1430,7 @@ class NotificationListView(APIView):
 
         #notifications = Notification.objects.filter(user=user_profile).order_by('-timestamp')
         notifications = Notification.objects.filter(user=user_profile, sender__isnull=False).order_by('-timestamp')
-        serializer = NotificationSerializer(notifications, many=True)
+        serializer = NotificationSerializer(notifications, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 

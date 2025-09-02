@@ -420,10 +420,24 @@ class UserProfileMiniSerializer(serializers.ModelSerializer):
 class NotificationSerializer(serializers.ModelSerializer):
     user = UserProfileMiniSerializer(read_only=True)    # receiver
     sender = UserProfileMiniSerializer(read_only=True)  # sender
+    following_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Notification
-        fields = ['id', 'user', 'sender', 'content', 'timestamp', 'read_status']
+        fields = ['id', 'user', 'sender', 'content', 'timestamp', 'read_status', 'following_status']
+
+    def get_following_status(self, obj):
+        request = self.context.get('request')
+        if not request or not hasattr(request, 'user') or not request.user.is_authenticated:
+            return False
+        # If sender is missing, there is no one to follow
+        if not getattr(obj, 'sender', None):
+            return False
+        try:
+            requester_profile = request.user.userprofile
+        except Exception:
+            return False
+        return obj.sender in requester_profile.following.all()
 
 
 def x():
