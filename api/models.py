@@ -125,6 +125,19 @@ class Event(models.Model):
         ('Completed', 'Completed'),
     ]
 
+    CITY_CHOICES = [
+        ('Abu Dhabi', 'Abu Dhabi'),
+        ('Ajman', 'Ajman'),
+        ('Al Ain', 'Al Ain'),
+        ('Dubai', 'Dubai'),
+        ('Fujairah', 'Fujairah'),
+        ('Hatta', 'Hatta'),
+        ('Khor Fakkan', 'Khor Fakkan'),
+        ('Ras Al Khaimah', 'Ras Al Khaimah'),
+        ('Sharjah', 'Sharjah'),
+        ('Umm Al Quwain', 'Umm Al Quwain'),
+    ]
+
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=255)
@@ -151,6 +164,10 @@ class Event(models.Model):
     is_vendor = models.BooleanField(default=False)
     cancellation_period_hours = models.PositiveIntegerField(default=24, help_text="Hours before event when cancellation is allowed")
     removed_players = models.ManyToManyField(UserProfile, related_name='removed_from_events', blank=True)
+    popularity_counter = models.PositiveIntegerField(default=0)
+    latitude = models.FloatField(default=0.0)
+    longitude = models.FloatField(default=0.0)
+    city = models.CharField(max_length=50, choices=CITY_CHOICES, default='Dubai')
 
 
     def clean(self):
