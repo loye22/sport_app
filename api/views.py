@@ -298,12 +298,8 @@ class LikePostView(APIView):
 class EventView(APIView):
     permission_classes = [IsAuthenticated]  # Enable authentication
     def get(self, request, *args, **kwargs):
-        # Assuming you have a OneToOne relation from User to UserProfile
-        user_profile = request.user.userprofile
-        
-        events = Event.objects.filter(status='Available') \
-            .exclude(team_a_members=user_profile) \
-            .exclude(team_b_members=user_profile)
+        # Get all available events without excluding joined events
+        events = Event.objects.filter(status='Available')
         
         serializer = EventSerializer(events, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -341,7 +337,10 @@ class JoinEventView(APIView):
                 return Response({'error': 'Event is not available for joining'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Check if the user is already a member of the event
-            if user in event.team_a_members.all() or user in event.team_b_members.all():
+            if (user in event.team_a_members.all() or user in event.team_b_members.all() or 
+                user in event.team_c_members.all() or user in event.team_d_members.all() or
+                user in event.team_e_members.all() or user in event.team_f_members.all() or
+                user in event.team_g_members.all() or user in event.team_h_members.all()):
                 return Response({'error': 'User has already joined the event'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Add the user to the specified team
@@ -349,6 +348,18 @@ class JoinEventView(APIView):
                 event.team_a_members.add(user)
             elif team == 'B':
                 event.team_b_members.add(user)
+            elif team == 'C':
+                event.team_c_members.add(user)
+            elif team == 'D':
+                event.team_d_members.add(user)
+            elif team == 'E':
+                event.team_e_members.add(user)
+            elif team == 'F':
+                event.team_f_members.add(user)
+            elif team == 'G':
+                event.team_g_members.add(user)
+            elif team == 'H':
+                event.team_h_members.add(user)
             else:
                 return Response({'error': 'Invalid team specified'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -363,6 +374,40 @@ class JoinEventView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
 
    
+
+class CompleteEventView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        event_id = request.data.get('event_id')
+        
+        if not event_id:
+            return Response({'error': 'event_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            event = Event.objects.get(id=event_id)
+        except Event.DoesNotExist:
+            return Response({'error': 'Event not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Check if the authenticated user is the host of the event
+        if request.user.userprofile != event.host:
+            return Response({'error': 'Only the event host can mark the event as completed'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Check if the event is currently available
+        if event.status != 'Available':
+            return Response({'error': f'Event is already {event.status.lower()}'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Mark the event as completed
+        event.status = 'Completed'
+        event.save()
+        
+        return Response({
+            'status': 'Event marked as completed successfully',
+            'event_id': str(event.id),
+            'event_title': event.title,
+            'new_status': event.status
+        }, status=status.HTTP_200_OK)
+
 
 class CancelJoinEventView(APIView):
     permission_classes = [IsAuthenticated]
