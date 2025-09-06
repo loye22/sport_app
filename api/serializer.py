@@ -131,6 +131,12 @@ class EventSerializer(serializers.ModelSerializer):
             host_details = serializers.SerializerMethodField(read_only=True)
             team_a_members = UserProfileSerializer(many=True, read_only=True)
             team_b_members = UserProfileSerializer(many=True, read_only=True)
+            team_c_members = UserProfileSerializer(many=True, read_only=True)
+            team_d_members = UserProfileSerializer(many=True, read_only=True)
+            team_e_members = UserProfileSerializer(many=True, read_only=True)
+            team_f_members = UserProfileSerializer(many=True, read_only=True)
+            team_g_members = UserProfileSerializer(many=True, read_only=True)
+            team_h_members = UserProfileSerializer(many=True, read_only=True)
             #Venue = VenueSerializer(read_only=True)
                # For output: nested venue details
             venue_details = VenueSerializer(source="Venue", read_only=True)
@@ -140,6 +146,11 @@ class EventSerializer(serializers.ModelSerializer):
                 queryset=Venue.objects.filter(status='Available')
             )
             
+            # Explicitly include location and popularity fields
+            city = serializers.CharField(read_only=True)
+            latitude = serializers.FloatField(read_only=True)
+            longitude = serializers.FloatField(read_only=True)
+            popularity_counter = serializers.IntegerField(read_only=True)
 
             class Meta:
                 model = Event
@@ -162,6 +173,12 @@ class EventSerializerEvent(serializers.ModelSerializer):
             host_details = serializers.SerializerMethodField(read_only=True)
             team_a_members = UserProfileSerializer(many=True, read_only=True)
             team_b_members = UserProfileSerializer(many=True, read_only=True)
+            team_c_members = UserProfileSerializer(many=True, read_only=True)
+            team_d_members = UserProfileSerializer(many=True, read_only=True)
+            team_e_members = UserProfileSerializer(many=True, read_only=True)
+            team_f_members = UserProfileSerializer(many=True, read_only=True)
+            team_g_members = UserProfileSerializer(many=True, read_only=True)
+            team_h_members = UserProfileSerializer(many=True, read_only=True)
             venue_details = VenueSerializer(source="Venue", read_only=True)
     
             Venue = serializers.PrimaryKeyRelatedField(
@@ -230,7 +247,7 @@ class EventSerializerEvent(serializers.ModelSerializer):
 
 class JoinEventSerializer(serializers.Serializer):
     #user_id = serializers.UUIDField()
-    team = serializers.ChoiceField(choices=['A', 'B'])
+    team = serializers.ChoiceField(choices=['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
 
 
 
@@ -291,10 +308,11 @@ class CopyEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = [
-            'id', 'title', 'score', 'image', 'category', 'Venue', 'date',
+            'id', 'title', 'score', 'image', 'image2', 'image3', 'image4', 'category', 'Venue', 'date',
             'start_time', 'end_time', 'description', 'host', 'status',
             'price', 'payment_status', 'max_members', 'cancellation_reason',
-            'created_at', 'team_a_members', 'team_b_members'
+            'created_at', 'team_a_members', 'team_b_members', 'team_c_members', 'team_d_members',
+            'team_e_members', 'team_f_members', 'team_g_members', 'team_h_members'
         ]
         read_only_fields = ['id', 'created_at']  # Auto-generated fields
 
@@ -360,6 +378,12 @@ class EventWithStatsSerializer(serializers.ModelSerializer):
     stats = EventStatsSerializer(read_only=True)  # Include the related EventStats data
     team_a_members = UserProfileSerializer(many=True, read_only=True)  # Include full details of Team A members
     team_b_members = UserProfileSerializer(many=True, read_only=True)  # Include full details of Team B members
+    team_c_members = UserProfileSerializer(many=True, read_only=True)  # Include full details of Team C members
+    team_d_members = UserProfileSerializer(many=True, read_only=True)  # Include full details of Team D members
+    team_e_members = UserProfileSerializer(many=True, read_only=True)  # Include full details of Team E members
+    team_f_members = UserProfileSerializer(many=True, read_only=True)  # Include full details of Team F members
+    team_g_members = UserProfileSerializer(many=True, read_only=True)  # Include full details of Team G members
+    team_h_members = UserProfileSerializer(many=True, read_only=True)  # Include full details of Team H members
     category = CategorySerializer(read_only=True)  # Include full details of the category
 
     class Meta:
@@ -376,6 +400,12 @@ class EventWithStatsSerializer(serializers.ModelSerializer):
             'category',  # Include the category details
             'team_a_members',
             'team_b_members',
+            'team_c_members',
+            'team_d_members',
+            'team_e_members',
+            'team_f_members',
+            'team_g_members',
+            'team_h_members',
             'stats',  # Include the stats field
         ]
         

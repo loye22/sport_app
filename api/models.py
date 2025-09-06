@@ -143,6 +143,9 @@ class Event(models.Model):
     title = models.CharField(max_length=255)
     score = models.CharField(max_length=5 ,null=True, blank=True)
     image = models.URLField(null=True, blank=True)
+    image2 = models.URLField(null=True, blank=True)
+    image3 = models.URLField(null=True, blank=True)
+    image4 = models.URLField(null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=PROTECT)
     Venue = models.ForeignKey('Venue', on_delete=PROTECT, limit_choices_to={'status': 'Available'})
     date = models.DateField()
@@ -152,7 +155,7 @@ class Event(models.Model):
     description = models.TextField()
     host = models.ForeignKey(UserProfile, on_delete=PROTECT, related_name='hosted_events')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Available')
-    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)], default=0.00)
     payment_status = models.BooleanField(default=False)
     max_members = models.PositiveIntegerField(default=0)
     cancellation_reason = models.TextField(null=True, blank=True)
@@ -160,6 +163,12 @@ class Event(models.Model):
     #additional_options = models.ManyToManyField(AdditionalOption, related_name='events', blank=True)
     team_a_members = models.ManyToManyField(UserProfile, related_name='team_a_members', blank=True)
     team_b_members = models.ManyToManyField(UserProfile, related_name='team_b_members', blank=True)
+    team_c_members = models.ManyToManyField(UserProfile, related_name='team_c_members', blank=True)
+    team_d_members = models.ManyToManyField(UserProfile, related_name='team_d_members', blank=True)
+    team_e_members = models.ManyToManyField(UserProfile, related_name='team_e_members', blank=True)
+    team_f_members = models.ManyToManyField(UserProfile, related_name='team_f_members', blank=True)
+    team_g_members = models.ManyToManyField(UserProfile, related_name='team_g_members', blank=True)
+    team_h_members = models.ManyToManyField(UserProfile, related_name='team_h_members', blank=True)
     event_stats = models.OneToOneField('EventStats', on_delete=PROTECT, null=True, blank=True, related_name='event_detail')
     is_vendor = models.BooleanField(default=False)
     cancellation_period_hours = models.PositiveIntegerField(default=24, help_text="Hours before event when cancellation is allowed")
@@ -168,13 +177,20 @@ class Event(models.Model):
     latitude = models.FloatField(default=0.0)
     longitude = models.FloatField(default=0.0)
     city = models.CharField(max_length=50, choices=CITY_CHOICES, default='Dubai')
+    teams_number = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(8)], default=2)
 
 
     def clean(self):
-        # Check the total members in both teams
+        # Check the total members in all teams
         team_a_count = self.team_a_members.count()
         team_b_count = self.team_b_members.count()
-        total_members = team_a_count + team_b_count
+        team_c_count = self.team_c_members.count()
+        team_d_count = self.team_d_members.count()
+        team_e_count = self.team_e_members.count()
+        team_f_count = self.team_f_members.count()
+        team_g_count = self.team_g_members.count()
+        team_h_count = self.team_h_members.count()
+        total_members = team_a_count + team_b_count + team_c_count + team_d_count + team_e_count + team_f_count + team_g_count + team_h_count
 
         # Check that start_time is not after end_time
         if self.start_time and self.end_time and self.start_time >= self.end_time:
@@ -182,7 +198,7 @@ class Event(models.Model):
 
 
         if total_members > self.max_members:
-            raise ValidationError(f"Total members in both teams cannot exceed the max members limit of {self.max_members}.")
+            raise ValidationError(f"Total members in all teams cannot exceed the max members limit of {self.max_members}.")
     def save(self, *args, **kwargs):
         # Call the clean method to validate the model before saving
         self.clean() 

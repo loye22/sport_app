@@ -28,11 +28,11 @@ class VenueAdmin(admin.ModelAdmin):
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'date', 'description', 'host', 'status', 'price', 'max_members', 'created_at')
-    search_fields = ('title', 'description')
-    list_filter = ('host' , 'status', 'date', 'created_at')
+    list_display = ('id', 'title', 'date', 'description', 'host', 'status', 'price', 'max_members', 'teams_number', 'image', 'image2', 'image3', 'image4', 'created_at')
+    search_fields = ('title', 'description', 'image', 'image2', 'image3', 'image4')
+    list_filter = ('host' , 'status', 'date', 'teams_number', 'created_at')
     ordering = ('-created_at',)
-    filter_horizontal = ('team_b_members' , 'team_a_members' , 'removed_players')  # Add this line to display the members field as a horizontal filter
+    filter_horizontal = ('team_a_members', 'team_b_members', 'team_c_members', 'team_d_members', 'team_e_members', 'team_f_members', 'team_g_members', 'team_h_members', 'removed_players')  # Add all team fields as horizontal filters
 
 
 class ChatMessageAdmin(admin.ModelAdmin):
