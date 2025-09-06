@@ -409,6 +409,43 @@ class CompleteEventView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+class GetEventView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, event_id, *args, **kwargs):
+        try:
+            event = Event.objects.get(id=event_id)
+        except Event.DoesNotExist:
+            return Response({'error': 'Event not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = EventSerializer(event, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UpdateEventView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def put(self, request, event_id, *args, **kwargs):
+        try:
+            event = Event.objects.get(id=event_id)
+        except Event.DoesNotExist:
+            return Response({'error': 'Event not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Check if the authenticated user is the host of the event
+        if request.user.userprofile != event.host:
+            return Response({'error': 'Only the event host can update the event'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Use the same serializer as create event
+        serializer = EventSerializer(event, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'status': 'Event updated successfully',
+                'event': serializer.data
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class CancelJoinEventView(APIView):
     permission_classes = [IsAuthenticated]
     
