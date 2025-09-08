@@ -998,6 +998,115 @@ class CreatePostAPIView(APIView):
         serializer = PostSerializer(post)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+
+class PostDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, post_id, *args, **kwargs):
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = PostSerializer(post, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UpdatePostAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, post_id, *args, **kwargs):
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Owner check
+        try:
+            current_user_profile = request.user.userprofile
+        except UserProfile.DoesNotExist:
+            return Response({"error": "User profile not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if post.created_by != current_user_profile:
+            return Response({"error": "You are not allowed to edit this post."}, status=status.HTTP_403_FORBIDDEN)
+
+        data = request.data
+
+        # Optional short fields length validation
+        for key in ["extra_title_1", "extra_value_1", "extra_title_2", "extra_value_2"]:
+            if key in data and data.get(key) is not None:
+                value = data.get(key)
+                if not isinstance(value, str):
+                    return Response({"error": f"{key} must be a string."}, status=status.HTTP_400_BAD_REQUEST)
+                if len(value) > 10:
+                    return Response({"error": f"{key} must be at most 10 characters."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update simple fields if present
+        updatable_fields = [
+            "activity_name", "scores", "possession", "image", "image2", "image3", "image4",
+            "fouls", "body_text", "extra_title_1", "extra_value_1", "extra_title_2", "extra_value_2"
+        ]
+        for field in updatable_fields:
+            if field in data:
+                setattr(post, field, data.get(field))
+
+        # Update category if provided
+        if "category_id" in data and data.get("category_id"):
+            try:
+                category = Category.objects.get(id=data.get("category_id"))
+            except Category.DoesNotExist:
+                return Response({"error": "Category not found."}, status=status.HTTP_400_BAD_REQUEST)
+            post.category = category
+
+        post.save()
+
+        # Update hashtags if provided
+        if "hashtag_ids" in data:
+            hashtag_ids = data.get("hashtag_ids")
+            if not isinstance(hashtag_ids, list):
+                return Response({"error": "hashtag_ids must be provided as a list."}, status=status.HTTP_400_BAD_REQUEST)
+            hashtags = Hashtag.objects.filter(id__in=hashtag_ids)
+            if hashtags.count() != len(hashtag_ids):
+                return Response({"error": "One or more hashtag IDs are invalid."}, status=status.HTTP_400_BAD_REQUEST)
+            post.hashtags.set(hashtags)
+
+        # Update participants if provided
+        if "selected_friends_ids" in data:
+            selected_friends_ids = data.get("selected_friends_ids")
+            if not isinstance(selected_friends_ids, list):
+                return Response({"error": "selected_friends_ids must be provided as a list."}, status=status.HTTP_400_BAD_REQUEST)
+            friends = UserProfile.objects.filter(id__in=selected_friends_ids)
+            if friends.count() != len(selected_friends_ids):
+                return Response({"error": "One or more selected friends IDs are invalid."}, status=status.HTTP_400_BAD_REQUEST)
+            post.participants.set(friends)
+
+        serializer = PostSerializer(post, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, post_id, *args, **kwargs):
+        return self.put(request, post_id, *args, **kwargs)
+
+
+class DeletePostAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, post_id, *args, **kwargs):
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            current_user_profile = request.user.userprofile
+        except UserProfile.DoesNotExist:
+            return Response({"error": "User profile not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if post.created_by != current_user_profile:
+            return Response({"error": "You are not allowed to delete this post."}, status=status.HTTP_403_FORBIDDEN)
+
+        post.delete()
+        return Response({"status": "Post deleted successfully"}, status=status.HTTP_200_OK)
+
 class ReportPostView(APIView):
     permission_classes = [IsAuthenticated]
 
