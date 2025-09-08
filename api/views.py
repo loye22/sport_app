@@ -900,11 +900,32 @@ class CreatePostAPIView(APIView):
         scores = request.data.get("scores")
         possession = request.data.get("possession")
         image = request.data.get("image")
+        image2 = request.data.get("image2")
+        image3 = request.data.get("image3")
+        image4 = request.data.get("image4")
         fouls = request.data.get("fouls")
         body_text = request.data.get("body_text")
         category_id = request.data.get("category_id")
         hashtag_ids = request.data.get("hashtag_ids")
         selected_friends_ids = request.data.get("selected_friends_ids")
+        extra_title_1 = request.data.get("extra_title_1")
+        extra_value_1 = request.data.get("extra_value_1")
+        extra_title_2 = request.data.get("extra_title_2")
+        extra_value_2 = request.data.get("extra_value_2")
+
+        # Validate optional short fields length if provided (<= 10 chars)
+        short_fields = {
+            "extra_title_1": extra_title_1,
+            "extra_value_1": extra_value_1,
+            "extra_title_2": extra_title_2,
+            "extra_value_2": extra_value_2,
+        }
+        for field_name, field_value in short_fields.items():
+            if field_value is not None:
+                if not isinstance(field_value, str):
+                    return Response({"error": f"{field_name} must be a string."}, status=status.HTTP_400_BAD_REQUEST)
+                if len(field_value) > 10:
+                    return Response({"error": f"{field_name} must be at most 10 characters."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Look up the Category instance
         try:
@@ -956,10 +977,17 @@ class CreatePostAPIView(APIView):
             scores=scores,
             possession=possession,
             image=image,
+            image2=image2,
+            image3=image3,
+            image4=image4,
             fouls=fouls,
             body_text=body_text,
             category=category,
-            created_by=created_by
+            created_by=created_by,
+            extra_title_1=extra_title_1,
+            extra_value_1=extra_value_1,
+            extra_title_2=extra_title_2,
+            extra_value_2=extra_value_2,
         )
 
         # Set many-to-many relationships
