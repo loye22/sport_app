@@ -265,6 +265,9 @@ class Post(models.Model):
     scores = models.CharField(max_length=5)
     possession = models.CharField(max_length=255)
     image = models.URLField(null=True, blank=True)
+    image2 = models.URLField(null=True, blank=True)
+    image3 = models.URLField(null=True, blank=True)
+    image4 = models.URLField(null=True, blank=True)
     fouls = models.CharField(max_length=100) 
     category = models.ForeignKey(Category, on_delete=PROTECT, null=True, blank=True)
     hashtags = models.ManyToManyField(Hashtag, related_name='posts', blank=True)
@@ -282,6 +285,10 @@ class Post(models.Model):
     report_reason = models.TextField(null=True, blank=True)
     share_counter = models.PositiveIntegerField(default=0)
     views = models.PositiveIntegerField(default=0)
+    extra_title_1 = models.CharField(max_length=10, null=True, blank=True)
+    extra_value_1 = models.CharField(max_length=10, null=True, blank=True)
+    extra_title_2 = models.CharField(max_length=10, null=True, blank=True)
+    extra_value_2 = models.CharField(max_length=10, null=True, blank=True)
 
 
 

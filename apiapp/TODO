@@ -1,0 +1,20 @@
+
+
+## Event update  
+1.  Add mutable event images.
+2.  Add mutable teams.
+3.  Make event images openable in a scrollable gallery.
+4.  Make user avatars clickable, linking to their profile.
+5.  Add a price field with a default value of `0`.
+6.  After joining an event, redirect the user to their profile with the "Planner" tab open.
+7.  Send a notification to the organizer when a user joins their event.
+
+##  Post updates 
+1. Add multable images post 
+2. add post event checkeker if it selcted the  Score, possionons , fouls will appler  and make it add 2  dynamic up  thisngs  title and 
+data up to 10  charts  these are optional 
+3. when you click on the user avatar  it will redirect to his profile 
+4. when you click on the hastage it will redirect to the expolor with all the things that have thsi hastage
+5 on repost make the original post deide ed and you can expaned it to se  the full post 
+6. make sure the report is exist 
+7. add edit and delete post option 
