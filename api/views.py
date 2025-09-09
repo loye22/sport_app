@@ -1041,34 +1041,49 @@ class UpdatePostAPIView(APIView):
                 if len(value) > 10:
                     return Response({"error": f"{key} must be at most 10 characters."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Update simple fields if present
-        updatable_fields = [
-            "activity_name", "scores", "possession", "image", "image2", "image3", "image4",
-            "fouls", "body_text", "extra_title_1", "extra_value_1", "extra_title_2", "extra_value_2"
-        ]
-        for field in updatable_fields:
-            if field in data:
-                setattr(post, field, data.get(field))
+        # Prepare prospective values (use provided values, else current ones)
+        prospective = {
+            "activity_name": data.get("activity_name", post.activity_name),
+            "body_text": data.get("body_text", post.body_text),
+            "image": data.get("image", post.image),
+            "image2": data.get("image2", getattr(post, "image2", None)),
+            "image3": data.get("image3", getattr(post, "image3", None)),
+            "image4": data.get("image4", getattr(post, "image4", None)),
+            "fouls": data.get("fouls", post.fouls),
+            "scores": data.get("scores", post.scores),
+            "possession": data.get("possession", post.possession),
+            "extra_title_1": data.get("extra_title_1", getattr(post, "extra_title_1", None)),
+            "extra_value_1": data.get("extra_value_1", getattr(post, "extra_value_1", None)),
+            "extra_title_2": data.get("extra_title_2", getattr(post, "extra_title_2", None)),
+            "extra_value_2": data.get("extra_value_2", getattr(post, "extra_value_2", None)),
+        }
 
-        # Update category if provided
-        if "category_id" in data and data.get("category_id"):
-            try:
-                category = Category.objects.get(id=data.get("category_id"))
-            except Category.DoesNotExist:
-                return Response({"error": "Category not found."}, status=status.HTTP_400_BAD_REQUEST)
-            post.category = category
+        # Apply simple fields to instance now (after basic validation below)
+        for field, value in prospective.items():
+            setattr(post, field, value)
 
-        post.save()
+        # Determine category (provided or existing)
+        if "category_id" in data:
+            if data.get("category_id"):
+                try:
+                    category = Category.objects.get(id=data.get("category_id"))
+                except Category.DoesNotExist:
+                    return Response({"error": "Category not found."}, status=status.HTTP_400_BAD_REQUEST)
+                post.category = category
+            else:
+                post.category = None
 
-        # Update hashtags if provided
+        # Determine hashtags (provided or existing)
         if "hashtag_ids" in data:
             hashtag_ids = data.get("hashtag_ids")
             if not isinstance(hashtag_ids, list):
                 return Response({"error": "hashtag_ids must be provided as a list."}, status=status.HTTP_400_BAD_REQUEST)
-            hashtags = Hashtag.objects.filter(id__in=hashtag_ids)
-            if hashtags.count() != len(hashtag_ids):
+            hashtags_qs = Hashtag.objects.filter(id__in=hashtag_ids)
+            if hashtags_qs.count() != len(hashtag_ids):
                 return Response({"error": "One or more hashtag IDs are invalid."}, status=status.HTTP_400_BAD_REQUEST)
-            post.hashtags.set(hashtags)
+            prospective_hashtag_ids = list(hashtags_qs.values_list("id", flat=True))
+        else:
+            prospective_hashtag_ids = list(post.hashtags.values_list("id", flat=True))
 
         # Update participants if provided
         if "selected_friends_ids" in data:
@@ -1079,6 +1094,35 @@ class UpdatePostAPIView(APIView):
             if friends.count() != len(selected_friends_ids):
                 return Response({"error": "One or more selected friends IDs are invalid."}, status=status.HTTP_400_BAD_REQUEST)
             post.participants.set(friends)
+
+        # Business validations on resulting state
+        # 1) Require at least one image among image/image2/image3/image4
+        images_after = [prospective.get("image"), prospective.get("image2"), prospective.get("image3"), prospective.get("image4")]
+        has_any_image = any(bool(str(img).strip()) for img in images_after if img is not None) or any(
+            bool(str(getattr(post, f, "") or "").strip()) for f in ["image", "image2", "image3", "image4"]
+        )
+        if not has_any_image:
+            return Response({"error": "At least one image (image/image2/image3/image4) is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 2) Require non-empty activity_name and body_text
+        if not isinstance(post.activity_name, str) or not post.activity_name.strip():
+            return Response({"error": "activity_name is required and cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(post.body_text, str) or not post.body_text.strip():
+            return Response({"error": "body_text is required and cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 3) Require category present
+        if post.category is None:
+            return Response({"error": "category_id is required and must be valid."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 4) Require at least one hashtag
+        if not prospective_hashtag_ids:
+            return Response({"error": "At least one hashtag is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Persist hashtag changes if provided
+        if "hashtag_ids" in data:
+            post.hashtags.set(Hashtag.objects.filter(id__in=prospective_hashtag_ids))
+
+        post.save()
 
         serializer = PostSerializer(post, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
