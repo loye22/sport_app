@@ -1594,7 +1594,7 @@ class SearchAPIView(APIView):
             Q(body_text__icontains=search_text)
         ).select_related('category', 'created_by', 'reported_by').prefetch_related(
             'hashtags', 'participants', 'liked_by', 'reposted_by'
-        )
+        ).order_by('-views')
         if category:
             post_qs = post_qs.filter(category__id=category)
         if hashtag:
@@ -1606,7 +1606,7 @@ class SearchAPIView(APIView):
             Q(description__icontains=search_text)
         ).select_related('category', 'Venue', 'host').prefetch_related(
             'team_a_members', 'team_b_members'
-        )
+        ).order_by('-popularity_counter')
         if category:
             event_qs = event_qs.filter(category__id=category)
         if price_max is not None:
