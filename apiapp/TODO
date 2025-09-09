@@ -8,11 +8,29 @@
 5.  Add a price field with a default value of `0`.
 6.  After joining an event, redirect the user to their profile with the "Planner" tab open.
 7.  Send a notification to the organizer when a user joins their event.
+8. add address input after adding the address it will show it in the map where the user can adjust it 
 
 
-## expolor
-TOP >> include the highest popuplar post , repost and events 
-Filter>> make sure the filter is cleared if you popup or exsite with not clicking apply 
-add pageination in the for each section 
-delete the search icon in the search bar 
-add gray spases between each elemnt in all the tabs Top, lates..... 
+
+
+
+# copy prevous activity 
+when you lick on it you select the activiy and you will navgate to screen prefillted with all the data from the prevous one 
+
+#chat 
+1. adjust the + sign  so when click it you will navgate to new  screen 
+this screem has the fowing  A. add new goup B.search txt with all the suer in the platfomm 
+the scren will laod the first 50  and when you serch from some one and click search it will call 
+api search 
+2. adjust the group create to have search filed on the top after the grop name  and make the iamge grouop after the grop name 
+3. on grop chat when you click in profile it will navgate you to his profile 
+4. delete, add participants in the goup chat 
+
+
+# user profile 
+1. add the USer namme at the top then full name  and the rest of thhe shit 
+2, add featch to see the folwers and following users 
+3. add history tab with all the events that been completed 
+4. cahnge planne tab to upcomming 
+5. add delete and edit profile option 
+6. add chat option to the other ppl profile 

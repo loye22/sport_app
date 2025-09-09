@@ -147,7 +147,7 @@ class Event(models.Model):
     image3 = models.URLField(null=True, blank=True)
     image4 = models.URLField(null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=PROTECT)
-    Venue = models.ForeignKey('Venue', on_delete=PROTECT, limit_choices_to={'status': 'Available'})
+    Venue = models.ForeignKey('Venue', on_delete=PROTECT, limit_choices_to={'status': 'Available'}, null=True, blank=True)
     date = models.DateField()
     start_time = models.TimeField(default='09:00')
     end_time = models.TimeField(default='17:00')

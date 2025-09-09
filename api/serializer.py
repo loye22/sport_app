@@ -143,14 +143,29 @@ class EventSerializer(serializers.ModelSerializer):
     
             # For input: allow the client to send a venue's PK
             Venue = serializers.PrimaryKeyRelatedField(
-                queryset=Venue.objects.filter(status='Available')
+                queryset=Venue.objects.filter(status='Available'),
+                required=False,
+                allow_null=True
             )
             
             # Explicitly include location and popularity fields
-            city = serializers.CharField(read_only=True)
+            city = serializers.ChoiceField(choices=Event.CITY_CHOICES, required=False)
             latitude = serializers.FloatField(read_only=True)
             longitude = serializers.FloatField(read_only=True)
             popularity_counter = serializers.IntegerField(read_only=True)
+            
+            # Additional image fields for event creation
+            image2 = serializers.URLField(required=False, allow_null=True)
+            image3 = serializers.URLField(required=False, allow_null=True)
+            image4 = serializers.URLField(required=False, allow_null=True)
+            
+            # Teams number field with validation
+            teams_number = serializers.IntegerField(
+                min_value=1, 
+                max_value=8, 
+                required=False,
+                default=2
+            )
 
             class Meta:
                 model = Event
@@ -164,6 +179,20 @@ class EventSerializer(serializers.ModelSerializer):
                         'profile_picture': obj.host.profile_picture  # Assuming this field holds the URL
                     }
                 return None
+            
+            def validate_teams_number(self, value):
+                if value is not None and (value < 1 or value > 8):
+                    raise serializers.ValidationError("Teams number must be between 1 and 8.")
+                return value
+            
+            def validate(self, data):
+                # Validate start_time and end_time
+                if 'start_time' in data and 'end_time' in data:
+                    if data['start_time'] >= data['end_time']:
+                        raise serializers.ValidationError({
+                            'end_time': 'End time must be after start time.'
+                        })
+                return data
 
 
 
