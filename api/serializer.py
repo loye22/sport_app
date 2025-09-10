@@ -150,8 +150,8 @@ class EventSerializer(serializers.ModelSerializer):
             
             # Explicitly include location and popularity fields
             city = serializers.ChoiceField(choices=Event.CITY_CHOICES, required=False)
-            latitude = serializers.FloatField(read_only=True)
-            longitude = serializers.FloatField(read_only=True)
+            latitude = serializers.FloatField(required=False)
+            longitude = serializers.FloatField(required=False)
             popularity_counter = serializers.IntegerField(read_only=True)
             
             # Additional image fields for event creation

@@ -1,21 +1,7 @@
 
 
-## Event update  
-1.  Add mutable event images.
-2.  Add mutable teams.
-3.  Make event images openable in a scrollable gallery.
-4.  Make user avatars clickable, linking to their profile.
-5.  Add a price field with a default value of `0`.
-6.  After joining an event, redirect the user to their profile with the "Planner" tab open.
-7.  Send a notification to the organizer when a user joins their event.
-8. add address input after adding the address it will show it in the map where the user can adjust it 
 
-
-
-
-
-# copy prevous activity 
-when you lick on it you select the activiy and you will navgate to screen prefillted with all the data from the prevous one 
+ 
 
 #chat 
 1. adjust the + sign  so when click it you will navgate to new  screen 
