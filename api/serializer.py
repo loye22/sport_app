@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import EventStats , RepostComment , AdditionalOption, Hashtag ,GeoLocation ,Venue, UserProfile , ChatMessage , Post , Comment , Event , Notification ,Repost , Category
+from .models import EventStats , RepostComment , AdditionalOption, Hashtag ,GeoLocation ,Venue, UserProfile , ChatMessage , Post , Comment , Event , Notification ,Repost , Category, DeleteRequest
 from django.contrib.auth.models import User
 
 
@@ -560,3 +560,52 @@ class NotificationSerializer(serializers.ModelSerializer):
 
 def x():
     pass
+
+
+# Basic profile info serializer
+class GeoLocationBasicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GeoLocation
+        fields = ['id', 'name', 'latitude', 'longitude']
+
+
+class UserProfileBasicInfoSerializer(serializers.ModelSerializer):
+    location = GeoLocationBasicSerializer(read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            'id',
+            'full_name',
+            'birth_date',
+            'profile_picture',
+            'address',
+            'location',
+        ]
+
+
+# Serializer for updating basic profile fields
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = [
+            'full_name',
+            'birth_date',
+            'address',
+            'profile_picture',
+            'latitude',
+            'longitude',
+        ]
+
+
+class DeleteRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeleteRequest
+        fields = ['id', 'reason', 'status', 'created_at', 'processed_at', 'admin_notes']
+        read_only_fields = ['id', 'status', 'created_at', 'processed_at', 'admin_notes']
+
+
+class DeleteRequestCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeleteRequest
+        fields = ['reason']

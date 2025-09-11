@@ -2,8 +2,8 @@ from django.shortcuts import render
 from rest_framework.generics import ListAPIView
 from datetime import datetime, timedelta
 from apiapp.settings import DEFAULT_FROM_EMAIL
-from .models import Review ,NoShow ,RepostComment , Repost ,AdditionalOption, EventCancellation ,  UserProfile, Category, Post, Comment , Event , Notification , Venue , Hashtag
-from .serializer import EventCompletedBriefSerializer , EventSerializerEvent , NotificationSerializer ,SearchUserSerializer ,SearchRequestSerializer, EventWithStatsSerializer ,UserProfileDetailSerializer ,RepostCommentSerializer , EventOverlapSerializer  ,CopyEventSerializer  ,HashtagSerializer ,  CategorySerializer,  CancelJoinEventSerializer ,UserProfileSerializer, VenueSerializer, PostSerializer, CommentSerializer , EventSerializer , JoinEventSerializer , UnfollowUserSerializer, RepostSerializer
+from .models import Review ,NoShow ,RepostComment , Repost ,AdditionalOption, EventCancellation ,  UserProfile, Category, Post, Comment , Event , Notification , Venue , Hashtag, DeleteRequest
+from .serializer import  UserProfileUpdateSerializer, UserProfileBasicInfoSerializer , EventCompletedBriefSerializer , EventSerializerEvent , NotificationSerializer ,SearchUserSerializer ,SearchRequestSerializer, EventWithStatsSerializer ,UserProfileDetailSerializer ,RepostCommentSerializer , EventOverlapSerializer  ,CopyEventSerializer  ,HashtagSerializer ,  CategorySerializer,  CancelJoinEventSerializer ,UserProfileSerializer, VenueSerializer, PostSerializer, CommentSerializer , EventSerializer , JoinEventSerializer , UnfollowUserSerializer, RepostSerializer, DeleteRequestSerializer, DeleteRequestCreateSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -28,6 +28,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.db import models 
 from rest_framework.permissions import AllowAny
 from django.contrib.auth.models import User
+from django.db.models.deletion import ProtectedError
 
 
 
@@ -1685,6 +1686,87 @@ class GetUserByIDView(APIView):
         return Response(serializer.data, status=200)
 
 
+class ProfileBasicInfoView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            user_profile = request.user.userprofile
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'User profile not found'}, status=404)
+
+        serializer = UserProfileBasicInfoSerializer(user_profile, context={'request': request})
+        return Response(serializer.data, status=200)
+
+
+class ProfileUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, *args, **kwargs):
+        try:
+            user_profile = request.user.userprofile
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'User profile not found'}, status=404)
+
+        # View-level validation
+        data = request.data
+        allowed_fields = {'full_name', 'birth_date', 'address', 'profile_picture', 'latitude', 'longitude'}
+        provided_keys = {key for key in data.keys() if key in allowed_fields}
+        if not provided_keys:
+            return Response({'error': 'No fields provided to update.'}, status=400)
+
+        def is_empty(value):
+            if value is None:
+                return True
+            if isinstance(value, str) and value.strip() == "":
+                return True
+            return False
+
+        # Validate non-empty for provided string/date fields
+        for field_name in ['full_name', 'address', 'profile_picture', 'birth_date']:
+            if field_name in data and is_empty(data.get(field_name)):
+                return Response({field_name: ['This field may not be empty.']}, status=400)
+
+        # Validate latitude/longitude if present
+        for field_name in ['latitude', 'longitude']:
+            if field_name in data:
+                value = data.get(field_name)
+                if is_empty(value):
+                    return Response({field_name: ['This field may not be empty.']}, status=400)
+                try:
+                    float(value)
+                except (TypeError, ValueError):
+                    return Response({field_name: ['A valid number is required.']}, status=400)
+
+        serializer = UserProfileUpdateSerializer(user_profile, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=200)
+        return Response(serializer.errors, status=400)
+
+
+class DeleteProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            user_profile = request.user.userprofile
+        except UserProfile.DoesNotExist:
+            return Response({"error": "User profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Attempt deletion; many relations are PROTECT and may block deletion
+        try:
+            # Optionally also delete the associated auth user after profile deletion
+            auth_user = user_profile.user
+            user_profile.delete()
+            # If profile deletion succeeded, also delete the auth user
+            auth_user.delete()
+            return Response({"status": "Profile deleted successfully"}, status=status.HTTP_200_OK)
+        except ProtectedError:
+            return Response({
+                "error": "Cannot delete profile due to existing related objects. Remove or reassign related data first."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
 class GetFollowersAndFollowingView(APIView):
     permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
 
@@ -2476,6 +2558,58 @@ class GetSavedItemsView(APIView):
             'post': post_serializer.data,
             'repost': repost_serializer.data
         }, status=status.HTTP_200_OK)
+
+
+class DeleteRequestView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        """
+        Create a delete request for the authenticated user's profile
+        """
+        try:
+            user_profile = request.user.userprofile
+        except UserProfile.DoesNotExist:
+            return Response({"error": "User profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if user already has a pending delete request
+        existing_request = DeleteRequest.objects.filter(
+            user_profile=user_profile, 
+            status='pending'
+        ).first()
+        
+        if existing_request:
+            return Response({
+                "error": "You already have a pending delete request. Please wait for it to be processed."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = DeleteRequestCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            # Create the delete request
+            delete_request = serializer.save(user_profile=user_profile)
+            
+            # Return the full delete request data
+            response_serializer = DeleteRequestSerializer(delete_request)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, *args, **kwargs):
+        """
+        Get the authenticated user's delete request status
+        """
+        try:
+            user_profile = request.user.userprofile
+        except UserProfile.DoesNotExist:
+            return Response({"error": "User profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        delete_request = DeleteRequest.objects.filter(user_profile=user_profile).first()
+        
+        if not delete_request:
+            return Response({"message": "No delete request found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = DeleteRequestSerializer(delete_request)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 def index(request):

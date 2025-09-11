@@ -412,3 +412,25 @@ class Review(models.Model):
         decimal_places=2,  # Number of decimal places
         validators=[MinValueValidator(1.0), MaxValueValidator(5.0)]  # Ensure the value is between 1.0 and 5.0
     )
+
+
+class DeleteRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='delete_requests')
+    reason = models.TextField(max_length=500, help_text="Reason for account deletion")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    admin_notes = models.TextField(max_length=500, null=True, blank=True, help_text="Admin notes about the request")
+
+    def __str__(self):
+        return f"Delete request for {self.user_profile.full_name} - {self.status}"
+
+    class Meta:
+        ordering = ['-created_at']

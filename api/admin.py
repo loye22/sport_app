@@ -1,6 +1,6 @@
 from django.contrib import admin
 from api.models import Notification ,RepostComment 
-from api.models import  Review , NoShow , EventStats  ,EventCancellation ,GeoLocation, UserProfile, GroupChat, ChatMessage, Event, AdditionalOption, Hashtag, Category, Venue, Post, Comment,  Repost , StoredImage
+from api.models import  Review , NoShow , EventStats  ,EventCancellation ,GeoLocation, UserProfile, GroupChat, ChatMessage, Event, AdditionalOption, Hashtag, Category, Venue, Post, Comment,  Repost , StoredImage, DeleteRequest
 from django.contrib import admin
 from unfold.admin import ModelAdmin
 
@@ -146,6 +146,31 @@ class ReviewAdmin(admin.ModelAdmin):
     list_filter = ('rating', 'event')
     ordering = ('-rating',)
 
+
+class DeleteRequestAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user_profile', 'reason', 'status', 'created_at', 'processed_at')
+    search_fields = ('user_profile__full_name', 'user_profile__email', 'reason')
+    list_filter = ('status', 'created_at', 'processed_at')
+    ordering = ('-created_at',)
+    readonly_fields = ('id', 'created_at', 'processed_at')
+    
+    fieldsets = (
+        ('Request Information', {
+            'fields': ('id', 'user_profile', 'reason', 'status')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'processed_at'),
+            'classes': ('collapse',)
+        }),
+        ('Admin Notes', {
+            'fields': ('admin_notes',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('user_profile')
+
 admin.site.register(Review, ReviewAdmin)
 admin.site.register(NoShow, NoShowAdmin)
 admin.site.register(EventStats,EventStatsAdmin)
@@ -165,6 +190,7 @@ admin.site.register(Venue,VenueAdmin)
 admin.site.register(Post , PostAdmin )
 admin.site.register(Comment,CommentAdmin)
 admin.site.register(StoredImage, StoredImageAdmin)
+admin.site.register(DeleteRequest, DeleteRequestAdmin)
 
 # Register your models here.
 
