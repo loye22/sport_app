@@ -362,13 +362,25 @@ class RepostCommentSerializer(serializers.ModelSerializer):
 
 
 class UserProfileDetailSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
     posts_count = serializers.SerializerMethodField()
     followers_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
+    
+    # Lightweight user representation for lists
+    class UserProfileBasicSerializer(serializers.ModelSerializer):
+        username = serializers.CharField(source='user.username', read_only=True)
+
+        class Meta:
+            model = UserProfile
+            fields = ['id', 'username', 'full_name', 'profile_picture']
+
+    followers = UserProfileBasicSerializer(many=True, read_only=True)
+    following = UserProfileBasicSerializer(many=True, read_only=True)
 
     class Meta:
         model = UserProfile
-        fields = ['id','full_name', 'birth_date', 'profile_picture', 'posts_count', 'followers_count', 'following_count']
+        fields = ['id','username','full_name', 'birth_date', 'profile_picture', 'posts_count', 'followers_count', 'following_count', 'followers', 'following']
 
     def get_posts_count(self, obj):
         return Post.objects.filter(created_by=obj).count()
@@ -442,11 +454,58 @@ class EventWithStatsSerializer(serializers.ModelSerializer):
 
 class SearchRequestSerializer(serializers.Serializer):
     search_text = serializers.CharField(required=True, min_length=1)
-    category = serializers.CharField(required=False, allow_null=True)
-    price_max = serializers.DecimalField(max_digits=10, decimal_places=2, required=False, allow_null=True)
-    price_min = serializers.DecimalField(max_digits=10, decimal_places=2, required=False, allow_null=True)
-    date = serializers.DateField(required=False, allow_null=True)
-    hashtag = serializers.CharField(required=False, allow_null=True)
+
+
+# Brief serializer for completed/participated events
+class EventCompletedBriefSerializer(serializers.ModelSerializer):
+    host = serializers.SerializerMethodField(read_only=True)
+    category = serializers.SerializerMethodField(read_only=True)
+    venue = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Event
+        fields = [
+            'id',
+            'title',
+            'score',
+            'status',
+            'date',
+            'start_time',
+            'end_time',
+            'image',
+            'host',
+            'category',
+            'venue',
+        ]
+
+    def get_host(self, obj):
+        if obj.host:
+            return {
+                'id': str(obj.host.id),
+                'full_name': obj.host.full_name,
+                'profile_picture': obj.host.profile_picture,
+            }
+        return None
+
+    def get_category(self, obj):
+        if obj.category:
+            return {
+                'id': str(obj.category.id),
+                'name': obj.category.name,
+            }
+        return None
+
+    def get_venue(self, obj):
+        if obj.Venue:
+            return {
+                'id': str(obj.Venue.id),
+                'title': obj.Venue.title,
+                'address': obj.Venue.address,
+                'latitude': obj.Venue.latitude,
+                'longitude': obj.Venue.longitude,
+            }
+        return None
+    
     
 
 class SearchUserSerializer(serializers.ModelSerializer):

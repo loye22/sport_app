@@ -3,7 +3,7 @@ from rest_framework.generics import ListAPIView
 from datetime import datetime, timedelta
 from apiapp.settings import DEFAULT_FROM_EMAIL
 from .models import Review ,NoShow ,RepostComment , Repost ,AdditionalOption, EventCancellation ,  UserProfile, Category, Post, Comment , Event , Notification , Venue , Hashtag
-from .serializer import EventSerializerEvent , NotificationSerializer ,SearchUserSerializer ,SearchRequestSerializer, EventWithStatsSerializer ,UserProfileDetailSerializer ,RepostCommentSerializer , EventOverlapSerializer  ,CopyEventSerializer  ,HashtagSerializer ,  CategorySerializer,  CancelJoinEventSerializer ,UserProfileSerializer, VenueSerializer, PostSerializer, CommentSerializer , EventSerializer , JoinEventSerializer , UnfollowUserSerializer, RepostSerializer
+from .serializer import EventCompletedBriefSerializer , EventSerializerEvent , NotificationSerializer ,SearchUserSerializer ,SearchRequestSerializer, EventWithStatsSerializer ,UserProfileDetailSerializer ,RepostCommentSerializer , EventOverlapSerializer  ,CopyEventSerializer  ,HashtagSerializer ,  CategorySerializer,  CancelJoinEventSerializer ,UserProfileSerializer, VenueSerializer, PostSerializer, CommentSerializer , EventSerializer , JoinEventSerializer , UnfollowUserSerializer, RepostSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -1565,6 +1565,31 @@ class AllEventsView(APIView):
 
         # Return the serialized data
         return Response(serializer.data, status=200)
+
+class CompletedParticipatedEventsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            user_profile = request.user.userprofile
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Events where status is Completed and user is host or in any team
+        events = Event.objects.filter(status='Completed').filter(
+            Q(host=user_profile) |
+            Q(team_a_members=user_profile) |
+            Q(team_b_members=user_profile) |
+            Q(team_c_members=user_profile) |
+            Q(team_d_members=user_profile) |
+            Q(team_e_members=user_profile) |
+            Q(team_f_members=user_profile) |
+            Q(team_g_members=user_profile) |
+            Q(team_h_members=user_profile)
+        ).distinct().order_by('-date', '-start_time')[:30]
+
+        serializer = EventCompletedBriefSerializer(events, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class SearchAPIView(APIView):
     def post(self, request):
