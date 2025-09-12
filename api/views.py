@@ -53,6 +53,30 @@ class UserProfileDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class UserSearchView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        query = request.query_params.get('q', '').strip()
+        if not query:
+            return Response([], status=status.HTTP_200_OK)
+
+        user_profiles = (
+            UserProfile.objects
+            .filter(
+                Q(email__icontains=query) |
+                Q(user__email__icontains=query) |
+                Q(full_name__icontains=query) |
+                Q(user__username__icontains=query)
+            )
+            .select_related('user')
+            .order_by('full_name')[:50]
+        )
+
+        serializer = SearchUserSerializer(user_profiles, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class MyEventsView(APIView):
     permission_classes = [IsAuthenticated]
 

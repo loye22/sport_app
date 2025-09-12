@@ -4,19 +4,9 @@
  
 
 #chat 
-1. adjust the + sign  so when click it you will navgate to new  screen 
-this screem has the fowing  A. add new goup B.search txt with all the suer in the platfomm 
-the scren will laod the first 50  and when you serch from some one and click search it will call 
-api search 
-2. adjust the group create to have search filed on the top after the grop name  and make the iamge grouop after the grop name 
+
 3. on grop chat when you click in profile it will navgate you to his profile 
 4. delete, add participants in the goup chat 
 
 
-# user profile 
-1. add the USer namme at the top then full name  and the rest of thhe shit 
-2, add featch to see the folwers and following users 
-3. add history tab with all the events that been completed 
-4. cahnge planne tab to upcomming 
-5. add delete and edit profile option 
-6. add chat option to the other ppl profile 
+ 
