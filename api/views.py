@@ -2636,5 +2636,116 @@ class DeleteRequestView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+def relationStatus(uuid_param, request):
+    """
+    Check if the authenticated sender is following the user with the given UUID.
+    
+    Args:
+        uuid_param: UUID of the target user to check
+        request: Django request object (must have authenticated user)
+    
+    Returns:
+        bool: True if sender is following the user with the given UUID, False otherwise
+    """
+    try:
+        # Get the authenticated sender from the request
+        sender = request.user.userprofile
+    except (AttributeError, UserProfile.DoesNotExist):
+        # Return False if user is not authenticated or profile doesn't exist
+        return False
+    
+    try:
+        # Convert uuid_param to UUID if it's a string
+        if isinstance(uuid_param, str):
+            target_uuid = UUID(uuid_param)
+        else:
+            target_uuid = uuid_param
+        
+        # Get the target user profile
+        target_user = UserProfile.objects.get(id=target_uuid)
+        
+        # Check if the sender is following the target user
+        return target_user in sender.following.all()
+    except (UserProfile.DoesNotExist, ValueError, TypeError):
+        # Return False if user doesn't exist or UUID is invalid
+        return False
+
+
+class RelationStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        """
+        Check if the authenticated user is following the user with the given UUID.
+        
+        Expected request body:
+        {
+            "user_id": "uuid-string"
+        }
+        """
+        user_id = request.data.get('user_id')
+        
+        if not user_id:
+            return Response({'error': 'user_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Validate UUID format
+        try:
+            UUID(user_id, version=4)
+        except ValueError:
+            return Response({'error': 'Invalid user_id format. Must be a valid UUID.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Use the relationStatus function
+        is_following = relationStatus(user_id, request)
+        
+        return Response({
+            'user_id': user_id,
+            'is_following': is_following
+        }, status=status.HTTP_200_OK)
+
+
+class AmITheEventHostView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        """
+        Check if the authenticated user is the host of the event with the given event ID.
+        
+        Expected request body:
+        {
+            "event_id": "uuid-string"
+        }
+        """
+        event_id = request.data.get('event_id')
+        
+        if not event_id:
+            return Response({'error': 'event_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Validate UUID format
+        try:
+            event_uuid = UUID(event_id, version=4)
+        except ValueError:
+            return Response({'error': 'Invalid event_id format. Must be a valid UUID.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Get the authenticated sender from the request
+            sender = request.user.userprofile
+        except (AttributeError, UserProfile.DoesNotExist):
+            return Response({'error': 'User profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            # Get the event
+            event = Event.objects.get(id=event_uuid)
+        except Event.DoesNotExist:
+            return Response({'error': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Check if the sender is the host of the event
+        is_host = sender == event.host
+        
+        return Response({
+            'event_id': event_id,
+            'is_host': is_host
+        }, status=status.HTTP_200_OK)
+
+
 def index(request):
     pass 
