@@ -1692,6 +1692,14 @@ class GetCurrentUserIDView(APIView):
         return Response(serializer.data, status=200)
 
 
+class GetCurrentUsernameView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        return Response({"username": user.username}, status=status.HTTP_200_OK)
+
+
 class GetUserByIDView(APIView):
     permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
 

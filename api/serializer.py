@@ -509,11 +509,12 @@ class EventCompletedBriefSerializer(serializers.ModelSerializer):
     
 
 class SearchUserSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
     is_following = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
-        fields = ['id', 'full_name', 'email', 'profile_picture', 'is_following']  # Add 'is_following'
+        fields = ['id', 'username', 'full_name', 'email', 'profile_picture', 'is_following']
 
     def get_is_following(self, obj):
         # Get the authenticated user from the request context
