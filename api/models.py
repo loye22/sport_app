@@ -109,6 +109,7 @@ class AdditionalOption(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    event = models.ForeignKey('Event', on_delete=PROTECT, related_name='additional_options', null=True, blank=True)
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     description = models.TextField()

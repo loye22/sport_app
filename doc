@@ -12,7 +12,7 @@ avalable in the google account /facebook ,  04:18
 9. show the following and the folloers with when you lcick on other user profile   00:10:00
 10. fix the edit permission in the app for the events 00:11:29
 11. all user to makee sap between iamges in the event sreeen  11:40 
-12. add delivero locaion slection filter using the map in the home screen <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TODO <<<<<<<<<<<<<<<<<<<<
+12. add delivero locaion slection filter using the map in the home screen  
 13. we cant damke dynaic tame names i dont have design and its a large task was not in the iriginal plan please , the issues the use may enter 
 too large team name and the hading issue it too much  00:14:18
 14. add team lable in the joined  event screen  00:14:36
@@ -21,4 +21,14 @@ too large team name and the hading issue it too much  00:14:18
 17. add the team option acceessry in the event screen  00:17:00  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TODO <<<<<<<<<<<<<<<<<<<<
 18. for remove palyer we had the same thing in the point 17 
 19. and the user name in the expllore screen in the accounts tab 00:18:47
-20. 
+20. when clickin in the hastag in the post make it open the explar screen with taht hashtag  00:19:57 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TODO <<<<<<<<<<<<<<<<<<<<
+21. in the post make sure that soccer / prossisson / fouls are dymamics  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TODO <<<<<<<<<<<<<<<<<<<< 
+22. in the posts , show the user who participate in that post by clikc on them "simple api call with post id retun them "  00:23:21 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TODO <<<<<<<<<<<<<<<<<<<< 
+23. Add reports section in the repost  24:00  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TODO <<<<<<<<<<<<<<<<<<<< 
+24. add  addinal option in the event 25:28 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TODO <<<<<<<<<<<<<<<<<<<<  
+25. in create new activity on the first step make sure that category are serchable , and option to add new category  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TODO <<<<<<<<<<<<<<<<<<<< 
+26. for adding new user to you group you should first add him as friend , but going to the chat srction , click the + sign  search for user then follow this user   00:27:09
+27.  the user name is not changeable beacuse it the id for that user it will cause a lot of issue in the future, not recommned at all   27:00
+28.  in the user profile when you scrolle up make sure that the upper part go up or squeez like instagram 27:55 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TODO <<<<<<<<<<<<<<<<<<<< 
+29. in the profile logit , saved posts , edit  have wierd look cahnge them to better design  28:44 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TODO <<<<<<<<<<<<<<<<<<<< 
+30. add remove featcher for the the ppl who i follow in the profile page  28:27  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TODO <<<<<<<<<<<<<<<<<<<< 

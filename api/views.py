@@ -3,7 +3,7 @@ from rest_framework.generics import ListAPIView
 from datetime import datetime, timedelta
 from apiapp.settings import DEFAULT_FROM_EMAIL
 from .models import Review ,NoShow ,RepostComment , Repost ,AdditionalOption, EventCancellation ,  UserProfile, Category, Post, Comment , Event , Notification , Venue , Hashtag, DeleteRequest
-from .serializer import  UserProfileUpdateSerializer, UserProfileBasicInfoSerializer , EventCompletedBriefSerializer , EventSerializerEvent , NotificationSerializer ,SearchUserSerializer ,SearchRequestSerializer, EventWithStatsSerializer ,UserProfileDetailSerializer ,RepostCommentSerializer , EventOverlapSerializer  ,CopyEventSerializer  ,HashtagSerializer ,  CategorySerializer,  CancelJoinEventSerializer ,UserProfileSerializer, VenueSerializer, PostSerializer, CommentSerializer , EventSerializer , JoinEventSerializer , UnfollowUserSerializer, RepostSerializer, DeleteRequestSerializer, DeleteRequestCreateSerializer
+from .serializer import  UserProfileUpdateSerializer, UserProfileBasicInfoSerializer , EventCompletedBriefSerializer , EventSerializerEvent , NotificationSerializer ,SearchUserSerializer ,SearchRequestSerializer, EventWithStatsSerializer ,UserProfileDetailSerializer ,RepostCommentSerializer , EventOverlapSerializer  ,CopyEventSerializer  ,HashtagSerializer ,  CategorySerializer,  CancelJoinEventSerializer ,UserProfileSerializer, VenueSerializer, PostSerializer, CommentSerializer , EventSerializer , JoinEventSerializer , UnfollowUserSerializer, RepostSerializer, DeleteRequestSerializer, DeleteRequestCreateSerializer, AdditionalOptionSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -2753,6 +2753,113 @@ class AmITheEventHostView(APIView):
             'event_id': event_id,
             'is_host': is_host
         }, status=status.HTTP_200_OK)
+
+
+class CreateAdditionalOptionView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        """
+        Create a new additional option for an event.
+        
+        Expected request body:
+        {
+            "event": "uuid-string",  # Event ID (optional, can be null)
+            "type": "referee" | "medical_officer" | "others",
+            "price": 100.00,
+            "description": "Description text",
+            "image": "https://example.com/image.jpg"  # Optional
+        }
+        """
+        # Get data from request
+        event_id = request.data.get('event')
+        option_type = request.data.get('type')
+        price = request.data.get('price')
+        description = request.data.get('description')
+        image = request.data.get('image', None)
+        
+        # Validate required fields
+        required_fields = {
+            'type': option_type,
+            'price': price,
+            'description': description
+        }
+        
+        missing_fields = [field for field, value in required_fields.items() if value is None]
+        if missing_fields:
+            return Response(
+                {'error': f'Missing required fields: {", ".join(missing_fields)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate type
+        valid_types = ['referee', 'medical_officer', 'others']
+        if option_type not in valid_types:
+            return Response(
+                {'error': f'Invalid type. Must be one of: {", ".join(valid_types)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate price
+        try:
+            price = float(price)
+            if price < 0:
+                return Response(
+                    {'error': 'Price cannot be negative'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'Price must be a valid number'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate event if provided
+        event = None
+        if event_id:
+            try:
+                event_uuid = UUID(event_id, version=4)
+                event = Event.objects.get(id=event_uuid)
+            except ValueError:
+                return Response(
+                    {'error': 'Invalid event ID format. Must be a valid UUID.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Event.DoesNotExist:
+                return Response(
+                    {'error': 'Event not found.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        
+        # Create additional option
+        try:
+            additional_option = AdditionalOption(
+                event=event,
+                type=option_type,
+                price=price,
+                description=description,
+                image=image
+            )
+            additional_option.full_clean()  # Run model validation
+            additional_option.save()
+            
+            # Serialize and return response
+            serializer = AdditionalOptionSerializer(additional_option)
+            return Response({
+                'message': 'Additional option created successfully',
+                'additional_option': serializer.data
+            }, status=status.HTTP_201_CREATED)
+            
+        except ValidationError as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to create additional option: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 def index(request):
