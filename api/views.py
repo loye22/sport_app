@@ -2862,5 +2862,53 @@ class CreateAdditionalOptionView(APIView):
             )
 
 
+class GetAdditionalOptionsByEventView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, event_id, *args, **kwargs):
+        """
+        Get all additional options for a specific event.
+        
+        URL parameter:
+        - event_id: UUID of the event (automatically converted by Django URL pattern)
+        """
+        # Validate UUID format (Django URL pattern should handle this, but adding explicit check for better error messages)
+        try:
+            # Try to convert to UUID if it's a string, or validate if it's already a UUID object
+            if isinstance(event_id, str):
+                event_uuid = UUID(event_id, version=4)
+            else:
+                event_uuid = event_id
+                # Validate it's a proper UUID by converting to string and back
+                str(event_uuid)
+        except (ValueError, AttributeError, TypeError):
+            return Response(
+                {'error': 'Invalid event ID format. Must be a valid UUID.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if event exists
+        try:
+            event = Event.objects.get(id=event_uuid)
+        except Event.DoesNotExist:
+            return Response(
+                {'error': 'Event not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Get all additional options for this event
+        additional_options = AdditionalOption.objects.filter(event=event)
+        
+        # Serialize the options
+        serializer = AdditionalOptionSerializer(additional_options, many=True)
+        
+        return Response({
+            'event_id': str(event_uuid),
+            'event_title': event.title,
+            'count': additional_options.count(),
+            'additional_options': serializer.data
+        }, status=status.HTTP_200_OK)
+
+
 def index(request):
     pass 
