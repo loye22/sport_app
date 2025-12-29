@@ -2925,5 +2925,30 @@ class GetAdditionalOptionsByEventView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+class GetRepostUserIdView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        repost_id = request.data.get('repost_id')
+
+        if not repost_id:
+            return Response({'error': 'repost_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            uuid_obj = uuid.UUID(repost_id, version=4)
+        except ValueError:
+            return Response({'error': 'Invalid repost_id format. Must be a valid UUID.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            repost = Repost.objects.get(id=uuid_obj)
+        except Repost.DoesNotExist:
+            return Response({'error': 'Repost not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({
+            'repost_id': str(repost.id),
+            'user_id': str(repost.user.id)
+        }, status=status.HTTP_200_OK)
+
+
 def index(request):
     pass 
