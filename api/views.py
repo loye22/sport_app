@@ -2925,6 +2925,134 @@ class GetAdditionalOptionsByEventView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+class OtherAddibleOptionView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        """
+        Create a new additional option for an event with default values and 'other' fields.
+        
+        Expected request body:
+        {
+            "event": "uuid-string",  # Event ID (required)
+            "other_price": 100.00,   # Required
+            "other_description": "Description text",  # Required
+            "other_image_url": "https://example.com/image.jpg",  # Required
+            "other_title": "Title text"  # Required
+        }
+        
+        Default values set:
+        - type: 'medical_officer'
+        - price: 0
+        - description: 'other'
+        - is_other: True
+        """
+        from decimal import Decimal
+        
+        # Get event ID from request
+        event_id = request.data.get('event')
+        
+        # Get required fields
+        other_price = request.data.get('other_price')
+        other_description = request.data.get('other_description')
+        other_image_url = request.data.get('other_image_url')
+        other_title = request.data.get('other_title')
+        
+        # Validate required fields
+        if not event_id:
+            return Response(
+                {'error': 'Event ID is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if other_price is None:
+            return Response(
+                {'error': 'other_price is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not other_description:
+            return Response(
+                {'error': 'other_description is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not other_image_url:
+            return Response(
+                {'error': 'other_image_url is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not other_title:
+            return Response(
+                {'error': 'other_title is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate event ID format and existence
+        try:
+            event_uuid = UUID(event_id, version=4)
+            event = Event.objects.get(id=event_uuid)
+        except ValueError:
+            return Response(
+                {'error': 'Invalid event ID format. Must be a valid UUID.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Event.DoesNotExist:
+            return Response(
+                {'error': 'Event not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Validate other_price
+        try:
+            other_price_decimal = Decimal(str(other_price))
+            if other_price_decimal < 0:
+                return Response(
+                    {'error': 'other_price cannot be negative'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except (ValueError, TypeError, Exception):
+            return Response(
+                {'error': 'other_price must be a valid number'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Create additional option with defaults
+        try:
+            additional_option = AdditionalOption(
+                event=event,
+                type='medical_officer',  # Using 'medical_officer' since 'medic' doesn't exist in TYPE_CHOICES
+                price=Decimal('0'),
+                description='other',
+                is_other=True,
+                other_price=other_price_decimal,
+                other_description=other_description,
+                other_image_url=other_image_url,
+                other_title=other_title
+            )
+            additional_option.full_clean()  # Run model validation
+            additional_option.save()
+            
+            # Serialize and return response
+            serializer = AdditionalOptionSerializer(additional_option)
+            return Response({
+                'message': 'Other additional option created successfully',
+                'additional_option': serializer.data
+            }, status=status.HTTP_201_CREATED)
+            
+        except ValidationError as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to create additional option: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
 class GetRepostUserIdView(APIView):
     permission_classes = [IsAuthenticated]
 
