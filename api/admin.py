@@ -2,7 +2,6 @@ from django.contrib import admin
 from api.models import Notification ,RepostComment 
 from api.models import  Review , NoShow , EventStats  ,EventCancellation ,GeoLocation, UserProfile, GroupChat, ChatMessage, Event, AdditionalOption, Hashtag, Category, Venue, Post, Comment,  Repost , StoredImage, DeleteRequest
 from django.contrib import admin
-from unfold.admin import ModelAdmin
 
 
 # class CustomAdminClass(ModelAdmin):
