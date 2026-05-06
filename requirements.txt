@@ -4,3 +4,5 @@ djangorestframework_simplejwt==5.5.1
 Pillow==12.2.0
 unfold==1.2.4
 whitenoise==6.9.0
+celery==5.6.3
+redis==7.4.0
