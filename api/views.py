@@ -752,7 +752,35 @@ class MyHostedEventsView(APIView):
             return Response({"error": f"Unexpected error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class HostedActivitiesAsHostView(APIView):
+    """All events (any status) where the authenticated user is the host."""
 
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            user_profile = request.user.userprofile
+        except UserProfile.DoesNotExist:
+            return Response({"error": "User profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        hosted_events = (
+            Event.objects.filter(host=user_profile)
+            .select_related("category", "Venue", "host", "event_stats")
+            .prefetch_related(
+                "team_a_members",
+                "team_b_members",
+                "team_c_members",
+                "team_d_members",
+                "team_e_members",
+                "team_f_members",
+                "team_g_members",
+                "team_h_members",
+                "removed_players",
+            )
+            .order_by("-date", "-start_time", "-created_at")
+        )
+        serializer = EventSerializer(hosted_events, many=True, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CreateVenueAPIView(APIView):
