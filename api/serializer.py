@@ -66,6 +66,7 @@ class PostSerializer(serializers.ModelSerializer):
     reposted_by = UserProfileSerializer(many=True, read_only=True)
     is_liked = serializers.SerializerMethodField( read_only=True) 
     comment_counter = serializers.SerializerMethodField(read_only=True)
+    isitmain = serializers.SerializerMethodField(read_only=True)
 
 
     class Meta:
@@ -79,6 +80,15 @@ class PostSerializer(serializers.ModelSerializer):
             return False
     def get_comment_counter(self, obj):
         return Comment.objects.filter(post=obj).count()
+    
+    def get_isitmain(self, obj):
+        request = self.context.get('request')
+        if not request or not hasattr(request, 'user') or not request.user.is_authenticated:
+            return False
+        user_profile = getattr(request.user, 'userprofile', None)
+        if not user_profile:
+            return False
+        return obj.created_by_id == user_profile.id
     
     
 class CommentSerializer(serializers.ModelSerializer):
@@ -300,6 +310,7 @@ class RepostSerializer(serializers.ModelSerializer):
     isLiked = serializers.SerializerMethodField(read_only=True)
     comment_counter = serializers.SerializerMethodField(read_only=True)
     is_saved = serializers.SerializerMethodField(read_only=True)  # <-- Add this line
+    isitmain = serializers.SerializerMethodField(read_only=True)
 
 
     class Meta:
@@ -321,7 +332,16 @@ class RepostSerializer(serializers.ModelSerializer):
             user_profile = getattr(request.user, 'userprofile', None)
             if user_profile:
                 return user_profile.saved_reposts.filter(id=obj.id).exists()
-        return False    
+        return False
+    
+    def get_isitmain(self, obj):
+        request = self.context.get('request')
+        if not request or not hasattr(request, 'user') or not request.user.is_authenticated:
+            return False
+        user_profile = getattr(request.user, 'userprofile', None)
+        if not user_profile:
+            return False
+        return obj.user_id == user_profile.id
 
 
 
