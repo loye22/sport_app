@@ -1,0 +1,561 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Event Details — {{ event.title }}{% endblock %}
+
+{% block content %}
+<!-- Back link -->
+<a href="{% url 'dashboard:events' %}" class="inline-flex items-center gap-2 text-zinc-500 hover:text-zinc-800 text-sm font-medium mb-6 transition-colors">
+    <i class="fa-solid fa-arrow-left"></i> Back to Events
+</a>
+
+<!-- Main grid layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- LEFT & MIDDLE COLUMNS (2/3 width) -->
+    <div class="lg:col-span-2 space-y-8">
+        
+        <!-- Header & Image Card -->
+        <div class="bg-white rounded-3xl border border-zinc-100 overflow-hidden shadow-sm">
+            {% if event.image %}
+            <div class="relative h-64 w-full">
+                <img src="{{ event.image }}" class="w-full h-full object-cover" alt="{{ event.title }}">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                <div class="absolute bottom-6 left-6 right-6 text-white">
+                    <span class="px-3 py-1 bg-yellow-400 text-zinc-900 text-xs font-semibold rounded-full uppercase tracking-wider">
+                        {{ event.category.name }}
+                    </span>
+                    <h1 class="text-3xl font-bold mt-2">{{ event.title }}</h1>
+                </div>
+            </div>
+            {% else %}
+            <div class="p-8 bg-gradient-to-r from-yellow-50 to-zinc-50 border-b border-zinc-100">
+                <span class="px-3 py-1 bg-yellow-400 text-zinc-900 text-xs font-semibold rounded-full uppercase tracking-wider">
+                    {{ event.category.name }}
+                </span>
+                <h1 class="text-3xl font-bold mt-3 text-zinc-800">{{ event.title }}</h1>
+            </div>
+            {% endif %}
+            
+            <!-- Quick stats bar -->
+            <div class="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-zinc-100 bg-zinc-50/50">
+                <div class="p-5 text-center">
+                    <span class="text-xs text-zinc-400 block mb-1">Status</span>
+                    <span class="px-3 py-1 rounded-2xl text-xs font-semibold
+                        {% if event.status == 'Available' %}bg-emerald-100 text-emerald-700
+                        {% elif event.status == 'Pending' %}bg-yellow-100 text-yellow-700
+                        {% elif event.status == 'Cancelled' %}bg-red-100 text-red-700
+                        {% else %}bg-zinc-100 text-zinc-600{% endif %}">
+                        {{ event.status }}
+                    </span>
+                </div>
+                <div class="p-5 text-center">
+                    <span class="text-xs text-zinc-400 block mb-1">Price</span>
+                    {% if event.price > 0 %}
+                    <span class="font-semibold text-zinc-700">{{ event.price }} AED</span>
+                    {% else %}
+                    <span class="font-semibold text-emerald-600">Free</span>
+                    {% endif %}
+                </div>
+                <div class="p-5 text-center">
+                    <span class="text-xs text-zinc-400 block mb-1">City</span>
+                    <span class="font-semibold text-zinc-700"><i class="fa-solid fa-location-dot mr-1 text-zinc-400"></i>{{ event.city }}</span>
+                </div>
+                <div class="p-5 text-center">
+                    <span class="text-xs text-zinc-400 block mb-1">Popularity</span>
+                    <span class="font-semibold text-zinc-700"><i class="fa-solid fa-fire mr-1 text-orange-400"></i>{{ event.popularity_counter }} views</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Description -->
+        <div class="bg-white rounded-3xl border border-zinc-100 p-8 shadow-sm">
+            <h2 class="text-xl font-semibold mb-4 text-zinc-800">Event Description</h2>
+            <p class="text-zinc-600 leading-relaxed whitespace-pre-wrap">{{ event.description|default:"No description provided." }}</p>
+        </div>
+
+        <!-- Venue details -->
+        {% if event.Venue %}
+        <div class="bg-white rounded-3xl border border-zinc-100 p-8 shadow-sm">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 class="text-xl font-semibold text-zinc-800">Venue Details</h2>
+                    <p class="text-zinc-400 text-xs mt-1">Booked sports venue info</p>
+                </div>
+                <span class="px-2.5 py-1 bg-zinc-100 rounded-lg text-xs text-zinc-500 font-medium">
+                    {{ event.Venue.status }}
+                </span>
+            </div>
+            <div class="flex flex-col md:flex-row gap-6">
+                {% if event.Venue.image %}
+                <img src="{{ event.Venue.image }}" class="w-full md:w-48 h-32 object-cover rounded-2xl" alt="{{ event.Venue.title }}">
+                {% endif %}
+                <div class="flex-1 space-y-3">
+                    <h3 class="font-semibold text-lg text-zinc-800">{{ event.Venue.title }}</h3>
+                    <p class="text-zinc-500 text-sm"><i class="fa-solid fa-map-pin mr-2 text-zinc-400"></i>{{ event.Venue.address }}</p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div class="bg-zinc-50 p-3 rounded-xl">
+                            <span class="text-[10px] text-zinc-400 block uppercase">Price/Hour</span>
+                            <span class="font-semibold text-sm text-zinc-700">{{ event.Venue.price_per_hour }} AED</span>
+                        </div>
+                        <div class="bg-zinc-50 p-3 rounded-xl">
+                            <span class="text-[10px] text-zinc-400 block uppercase">Coordinates</span>
+                            <span class="font-semibold text-sm text-zinc-700">{{ event.Venue.latitude|floatformat:4 }}, {{ event.Venue.longitude|floatformat:4 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Teams Section -->
+        <div class="bg-white rounded-3xl border border-zinc-100 p-8 shadow-sm">
+            <h2 class="text-xl font-semibold mb-6 text-zinc-800">Teams & Players</h2>
+            
+            <div class="space-y-8">
+                <!-- Loop over allowed teams based on teams_number -->
+                {% with teams_count=event.teams_number %}
+                
+                <!-- Team A -->
+                {% if teams_count >= 1 %}
+                <div>
+                    <div class="flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
+                        <h3 class="font-semibold text-zinc-700 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 bg-blue-500 rounded-full"></span> Team A
+                        </h3>
+                        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">{{ event.team_a_members.count }} players</span>
+                    </div>
+                    {% if event.team_a_members.all %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for player in event.team_a_members.all %}
+                        <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
+                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                                {{ player.full_name|first|upper }}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
+                                <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
+                            </div>
+                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-xs text-zinc-400 italic">No players in Team A</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Team B -->
+                {% if teams_count >= 2 %}
+                <div class="pt-4">
+                    <div class="flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
+                        <h3 class="font-semibold text-zinc-700 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 bg-red-500 rounded-full"></span> Team B
+                        </h3>
+                        <span class="text-xs bg-red-50 text-red-700 px-2 py-0.5 rounded-full font-medium">{{ event.team_b_members.count }} players</span>
+                    </div>
+                    {% if event.team_b_members.all %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for player in event.team_b_members.all %}
+                        <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
+                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                                {{ player.full_name|first|upper }}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
+                                <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
+                            </div>
+                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-xs text-zinc-400 italic">No players in Team B</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Team C -->
+                {% if teams_count >= 3 %}
+                <div class="pt-4">
+                    <div class="flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
+                        <h3 class="font-semibold text-zinc-700 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span> Team C
+                        </h3>
+                        <span class="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-medium">{{ event.team_c_members.count }} players</span>
+                    </div>
+                    {% if event.team_c_members.all %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for player in event.team_c_members.all %}
+                        <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
+                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                                {{ player.full_name|first|upper }}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
+                                <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
+                            </div>
+                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-xs text-zinc-400 italic">No players in Team C</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Team D -->
+                {% if teams_count >= 4 %}
+                <div class="pt-4">
+                    <div class="flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
+                        <h3 class="font-semibold text-zinc-700 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 bg-purple-500 rounded-full"></span> Team D
+                        </h3>
+                        <span class="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full font-medium">{{ event.team_d_members.count }} players</span>
+                    </div>
+                    {% if event.team_d_members.all %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for player in event.team_d_members.all %}
+                        <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
+                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                                {{ player.full_name|first|upper }}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
+                                <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
+                            </div>
+                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-xs text-zinc-400 italic">No players in Team D</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Team E -->
+                {% if teams_count >= 5 %}
+                <div class="pt-4">
+                    <div class="flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
+                        <h3 class="font-semibold text-zinc-700 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 bg-orange-500 rounded-full"></span> Team E
+                        </h3>
+                        <span class="text-xs bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full font-medium">{{ event.team_e_members.count }} players</span>
+                    </div>
+                    {% if event.team_e_members.all %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for player in event.team_e_members.all %}
+                        <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
+                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                                {{ player.full_name|first|upper }}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
+                                <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
+                            </div>
+                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-xs text-zinc-400 italic">No players in Team E</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Team F -->
+                {% if teams_count >= 6 %}
+                <div class="pt-4">
+                    <div class="flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
+                        <h3 class="font-semibold text-zinc-700 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 bg-pink-500 rounded-full"></span> Team F
+                        </h3>
+                        <span class="text-xs bg-pink-50 text-pink-700 px-2 py-0.5 rounded-full font-medium">{{ event.team_f_members.count }} players</span>
+                    </div>
+                    {% if event.team_f_members.all %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for player in event.team_f_members.all %}
+                        <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
+                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                                {{ player.full_name|first|upper }}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
+                                <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
+                            </div>
+                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-xs text-zinc-400 italic">No players in Team F</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Team G -->
+                {% if teams_count >= 7 %}
+                <div class="pt-4">
+                    <div class="flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
+                        <h3 class="font-semibold text-zinc-700 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 bg-cyan-500 rounded-full"></span> Team G
+                        </h3>
+                        <span class="text-xs bg-cyan-50 text-cyan-700 px-2 py-0.5 rounded-full font-medium">{{ event.team_g_members.count }} players</span>
+                    </div>
+                    {% if event.team_g_members.all %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for player in event.team_g_members.all %}
+                        <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
+                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                                {{ player.full_name|first|upper }}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
+                                <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
+                            </div>
+                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-xs text-zinc-400 italic">No players in Team G</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Team H -->
+                {% if teams_count >= 8 %}
+                <div class="pt-4">
+                    <div class="flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
+                        <h3 class="font-semibold text-zinc-700 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 bg-amber-500 rounded-full"></span> Team H
+                        </h3>
+                        <span class="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-medium">{{ event.team_h_members.count }} players</span>
+                    </div>
+                    {% if event.team_h_members.all %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for player in event.team_h_members.all %}
+                        <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
+                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                                {{ player.full_name|first|upper }}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
+                                <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
+                            </div>
+                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-xs text-zinc-400 italic">No players in Team H</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN (1/3 width) -->
+    <div class="space-y-8">
+        
+        <!-- Booking & Host Details -->
+        <div class="bg-white rounded-3xl border border-zinc-100 p-6 shadow-sm space-y-6">
+            <div>
+                <h3 class="font-semibold text-zinc-800 text-lg mb-4">Event Details</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 text-sm">
+                        <div class="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-500 flex-shrink-0">
+                            <i class="fa-solid fa-calendar"></i>
+                        </div>
+                        <div>
+                            <span class="text-zinc-400 block text-xs">Date</span>
+                            <span class="font-medium text-zinc-700">{{ event.date|date:"l, M d, Y" }}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 text-sm">
+                        <div class="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-500 flex-shrink-0">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div>
+                            <span class="text-zinc-400 block text-xs">Time</span>
+                            <span class="font-medium text-zinc-700">{{ event.start_time|time:"H:i" }} – {{ event.end_time|time:"H:i" }}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 text-sm">
+                        <div class="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-500 flex-shrink-0">
+                            <i class="fa-solid fa-user-group"></i>
+                        </div>
+                        <div>
+                            <span class="text-zinc-400 block text-xs">Max Members Limit</span>
+                            <span class="font-medium text-zinc-700">{{ event.max_members }} slots</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 text-sm">
+                        <div class="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-500 flex-shrink-0">
+                            <i class="fa-solid fa-hourglass"></i>
+                        </div>
+                        <div>
+                            <span class="text-zinc-400 block text-xs">Cancellation Period</span>
+                            <span class="font-medium text-zinc-700">{{ event.cancellation_period_hours }} hours</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-zinc-100 pt-6">
+                <span class="text-zinc-400 block text-xs mb-3">Event Host</span>
+                <a href="{% url 'dashboard:user_detail' event.host.pk %}" class="flex items-center gap-3 p-3 bg-zinc-50 hover:bg-zinc-100/70 border border-zinc-100/50 rounded-2xl transition-all">
+                    <div class="w-10 h-10 bg-yellow-400 text-white font-bold rounded-xl flex items-center justify-center text-sm">
+                        {{ event.host.full_name|first|upper }}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <span class="font-semibold text-sm text-zinc-800 block truncate">{{ event.host.full_name }}</span>
+                        <span class="text-xs text-zinc-400 block truncate">{{ event.host.phone_number }}</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-zinc-400 text-xs pr-1"></i>
+                </a>
+            </div>
+            
+            {% if event.cancellation_reason %}
+            <div class="border-t border-zinc-100 pt-6">
+                <span class="text-xs font-semibold text-red-500 uppercase tracking-wider block mb-1">Cancellation Reason</span>
+                <p class="text-zinc-600 text-sm bg-red-50 border border-red-100 rounded-2xl p-4">{{ event.cancellation_reason }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Management Actions -->
+        <div class="bg-white rounded-3xl border border-zinc-100 p-6 shadow-sm space-y-4">
+            <h3 class="font-semibold text-zinc-800 text-lg mb-2">Management</h3>
+            
+            {% if perms_map.can_edit_events and event.status == 'Available' %}
+            <button onclick="document.getElementById('cancel-form-detail').classList.toggle('hidden')"
+                    class="w-full py-3 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-2xl text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+                <i class="fa-solid fa-ban"></i> Cancel Event
+            </button>
+            <form id="cancel-form-detail" action="{% url 'dashboard:event_cancel' event.pk %}" method="post" class="hidden space-y-2 mt-2">
+                {% csrf_token %}
+                <textarea name="reason" placeholder="Explain the cancellation reason..." rows="3"
+                          class="w-full border border-zinc-200 rounded-2xl p-3 text-sm focus:outline-none focus:border-yellow-300 resize-none"></textarea>
+                <button type="submit" class="w-full py-2.5 bg-amber-400 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold transition-colors">
+                    Confirm Cancellation
+                </button>
+            </form>
+            {% endif %}
+            
+            {% if perms_map.can_delete_events %}
+            <button onclick="confirmDelete(
+                'Delete event \'{{ event.title }}\' permanently? This will remove all bookings, teams and ratings related to it.',
+                () => document.getElementById('del-event-detail').submit()
+            )" class="w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-2xl text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+                <i class="fa-solid fa-trash"></i> Delete Event
+            </button>
+            <form id="del-event-detail" action="{% url 'dashboard:event_delete' event.pk %}" method="post" class="hidden">
+                {% csrf_token %}
+            </form>
+            {% endif %}
+        </div>
+
+        <!-- Event Stats Details (If stats exist) -->
+        {% if event.event_stats %}
+        <div class="bg-white rounded-3xl border border-zinc-100 p-6 shadow-sm space-y-4">
+            <h3 class="font-semibold text-zinc-800 text-lg mb-2">Match Statistics</h3>
+            
+            <div class="space-y-4">
+                <div class="bg-zinc-50 p-4 rounded-2xl text-center">
+                    <span class="text-xs text-zinc-400 block mb-1">Match Winner</span>
+                    <span class="font-bold text-sm text-zinc-700">
+                        {% if event.event_stats.team_winner == 'A' %}
+                        Team A
+                        {% elif event.event_stats.team_winner == 'B' %}
+                        Team B
+                        {% else %}
+                        Not Determined / Draw
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="space-y-3 pt-2">
+                    <!-- Attempts -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs text-zinc-400 font-medium">
+                            <span>Team A</span>
+                            <span class="text-zinc-600">Total Attempts</span>
+                            <span>Team B</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm font-semibold w-8 text-left">{{ event.event_stats.team_a_total_attempts }}</span>
+                            <div class="flex-1 h-2 bg-zinc-100 rounded-full overflow-hidden flex">
+                                <div class="bg-blue-500 h-full" style="width: {% widthratio event.event_stats.team_a_total_attempts event.event_stats.team_a_total_attempts|add:event.event_stats.team_b_total_attempts 100 %}%"></div>
+                                <div class="bg-red-500 h-full" style="width: {% widthratio event.event_stats.team_b_total_attempts event.event_stats.team_a_total_attempts|add:event.event_stats.team_b_total_attempts 100 %}%"></div>
+                            </div>
+                            <span class="text-sm font-semibold w-8 text-right">{{ event.event_stats.team_b_total_attempts }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Attempts on target -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs text-zinc-400 font-medium">
+                            <span>Team A</span>
+                            <span class="text-zinc-600">On Target</span>
+                            <span>Team B</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm font-semibold w-8 text-left">{{ event.event_stats.team_a_attempts_on_target }}</span>
+                            <div class="flex-1 h-2 bg-zinc-100 rounded-full overflow-hidden flex">
+                                <div class="bg-blue-500 h-full" style="width: {% widthratio event.event_stats.team_a_attempts_on_target event.event_stats.team_a_attempts_on_target|add:event.event_stats.team_b_attempts_on_target 100 %}%"></div>
+                                <div class="bg-red-500 h-full" style="width: {% widthratio event.event_stats.team_b_attempts_on_target event.event_stats.team_a_attempts_on_target|add:event.event_stats.team_b_attempts_on_target 100 %}%"></div>
+                            </div>
+                            <span class="text-sm font-semibold w-8 text-right">{{ event.event_stats.team_b_attempts_on_target }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Possession -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs text-zinc-400 font-medium">
+                            <span>Team A</span>
+                            <span class="text-zinc-600">Possession</span>
+                            <span>Team B</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm font-semibold w-8 text-left">{{ event.event_stats.team_a_possession }}%</span>
+                            <div class="flex-1 h-2 bg-zinc-100 rounded-full overflow-hidden flex">
+                                <div class="bg-blue-500 h-full" style="width: {{ event.event_stats.team_a_possession }}%"></div>
+                                <div class="bg-red-500 h-full" style="width: {{ event.event_stats.team_b_possession }}%"></div>
+                            </div>
+                            <span class="text-sm font-semibold w-8 text-right">{{ event.event_stats.team_b_possession }}%</span>
+                        </div>
+                    </div>
+
+                    <!-- Fouls -->
+                    <div class="flex justify-between text-sm py-1 border-t border-zinc-50">
+                        <span class="font-semibold text-zinc-700">{{ event.event_stats.team_a_fouls_committed }}</span>
+                        <span class="text-xs text-zinc-400">Fouls Committed</span>
+                        <span class="font-semibold text-zinc-700">{{ event.event_stats.team_b_fouls_committed }}</span>
+                    </div>
+
+                    <!-- Corners -->
+                    <div class="flex justify-between text-sm py-1 border-t border-zinc-50">
+                        <span class="font-semibold text-zinc-700">{{ event.event_stats.team_a_corners }}</span>
+                        <span class="text-xs text-zinc-400">Corners</span>
+                        <span class="font-semibold text-zinc-700">{{ event.event_stats.team_b_corners }}</span>
+                    </div>
+
+                    <!-- Yellow / Red cards -->
+                    <div class="flex justify-between text-sm py-1 border-t border-zinc-50">
+                        <span class="font-semibold text-yellow-600"><i class="fa-solid fa-square mr-1"></i>{{ event.event_stats.team_a_yellow_cards }} <span class="text-red-500 ml-2"><i class="fa-solid fa-square mr-1"></i>{{ event.event_stats.team_a_red_cards }}</span></span>
+                        <span class="text-xs text-zinc-400">Cards (Y/R)</span>
+                        <span class="font-semibold text-yellow-600"><i class="fa-solid fa-square mr-1"></i>{{ event.event_stats.team_b_yellow_cards }} <span class="text-red-500 ml-2"><i class="fa-solid fa-square mr-1"></i>{{ event.event_stats.team_b_red_cards }}</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+<tr class="hover:bg-zinc-50 transition-colors">
+    <td class="px-6 py-4">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-yellow-100 rounded-xl flex items-center justify-center text-yellow-600 font-bold text-sm flex-shrink-0">
+                {{ profile.full_name|first|upper }}
+            </div>
+            <div>
+                <div class="font-medium text-sm">{{ profile.full_name }}</div>
+                <div class="text-xs text-zinc-400">{{ profile.phone_number }}</div>
+            </div>
+        </div>
+    </td>
+    <td class="px-6 py-4 text-sm text-zinc-600">{{ profile.email }}</td>
+    <td class="px-6 py-4 text-sm text-zinc-600">{{ profile.gender }}</td>
+    <td class="px-6 py-4 text-sm text-zinc-400">{{ profile.created_at|date:"M d, Y" }}</td>
+    <td class="px-6 py-4">
+        <span class="text-amber-500 font-medium text-sm">
+            {{ profile.average_host_rating }} ★
+        </span>
+    </td>
+    <td class="px-6 py-4 text-right">
+        <div class="flex items-center justify-end gap-2">
+            <a href="{% url 'dashboard:user_detail' profile.pk %}"
+               class="px-3 py-1.5 text-xs bg-zinc-100 hover:bg-zinc-200 rounded-xl font-medium transition-colors">
+                View
+            </a>
+            <button onclick="confirmDelete(
+                'Delete user {{ profile.full_name }}? This is permanent.',
+                () => document.getElementById('del-user-{{ profile.pk }}').submit()
+            )" class="px-3 py-1.5 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-medium transition-colors">
+                Delete
+            </button>
+            <form id="del-user-{{ profile.pk }}"
+                  action="{% url 'dashboard:user_delete' profile.pk %}"
+                  method="post" class="hidden">{% csrf_token %}</form>
+        </div>
+    </td>
+</tr>

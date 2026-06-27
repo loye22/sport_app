@@ -1,0 +1,246 @@
+{% extends "dashboard/base.html" %}
+{% block title %}User Profile — {{ profile.full_name }}{% endblock %}
+
+{% block content %}
+<!-- Back link -->
+<a href="{% url 'dashboard:users' %}" class="inline-flex items-center gap-2 text-zinc-500 hover:text-zinc-800 text-sm font-medium mb-6 transition-colors">
+    <i class="fa-solid fa-arrow-left"></i> Back to Users
+</a>
+
+<!-- Main grid layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- LEFT COLUMN (1/3 width): Profile Card & Quick Info -->
+    <div class="space-y-8">
+        
+        <!-- Main Profile Info -->
+        <div class="bg-white rounded-3xl border border-zinc-100 p-8 shadow-sm text-center relative overflow-hidden">
+            <!-- Background banner effect -->
+            <div class="absolute top-0 left-0 right-0 h-24 bg-gradient-to-r from-yellow-100 to-yellow-50"></div>
+            
+            <!-- Avatar -->
+            <div class="relative mt-8 mb-4 inline-block">
+                {% if profile.profile_picture %}
+                <img src="{{ profile.profile_picture }}" class="w-24 h-24 rounded-3xl object-cover mx-auto border-4 border-white shadow-md" alt="{{ profile.full_name }}">
+                {% else %}
+                <div class="w-24 h-24 rounded-3xl bg-yellow-400 text-white text-3xl font-bold flex items-center justify-center mx-auto border-4 border-white shadow-md">
+                    {{ profile.full_name|first|upper }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <h1 class="text-2xl font-bold text-zinc-800">{{ profile.full_name }}</h1>
+            <p class="text-zinc-400 text-sm mt-1">{{ profile.user.username }}</p>
+            
+            <!-- Rating -->
+            <div class="flex items-center justify-center gap-1.5 mt-3 text-amber-500 font-semibold text-lg">
+                <span>{{ profile.average_host_rating }}</span>
+                <i class="fa-solid fa-star text-sm"></i>
+                <span class="text-zinc-300 font-normal text-xs ml-1">Host Rating</span>
+            </div>
+
+            <!-- Followers/Following count -->
+            <div class="grid grid-cols-2 divide-x divide-zinc-100 border-t border-b border-zinc-50 py-4 my-6">
+                <div>
+                    <span class="font-bold text-zinc-700 block text-lg">{{ profile.followers.count }}</span>
+                    <span class="text-xs text-zinc-400">Followers</span>
+                </div>
+                <div>
+                    <span class="font-bold text-zinc-700 block text-lg">{{ profile.following.count }}</span>
+                    <span class="text-xs text-zinc-400">Following</span>
+                </div>
+            </div>
+
+            <!-- User Status & Role -->
+            <div class="flex justify-center gap-2 mb-2">
+                {% if profile.user.is_superuser %}
+                <span class="px-2.5 py-1 bg-purple-50 border border-purple-200 text-purple-700 text-xs font-semibold rounded-lg">
+                    Superuser
+                </span>
+                {% elif profile.user.is_staff %}
+                <span class="px-2.5 py-1 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold rounded-lg">
+                    Staff
+                </span>
+                {% endif %}
+
+                {% if profile.pythondashboard_role %}
+                <span class="px-2.5 py-1 bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs font-semibold rounded-lg">
+                    {{ profile.pythondashboard_role }}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Personal Details -->
+        <div class="bg-white rounded-3xl border border-zinc-100 p-6 shadow-sm space-y-4">
+            <h3 class="font-semibold text-zinc-800 text-lg mb-2">Personal Details</h3>
+            <div class="space-y-4">
+                <div class="flex items-start gap-3 text-sm">
+                    <div class="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-500 flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <span class="text-zinc-400 block text-[10px] uppercase font-semibold">Email</span>
+                        <span class="font-medium text-zinc-700 block truncate">{{ profile.email }}</span>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 text-sm">
+                    <div class="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-500 flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                    <div>
+                        <span class="text-zinc-400 block text-[10px] uppercase font-semibold">Phone</span>
+                        <span class="font-medium text-zinc-700">{{ profile.phone_number }}</span>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 text-sm">
+                    <div class="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-500 flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-venus-mars"></i>
+                    </div>
+                    <div>
+                        <span class="text-zinc-400 block text-[10px] uppercase font-semibold">Gender</span>
+                        <span class="font-medium text-zinc-700">{{ profile.gender }}</span>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 text-sm">
+                    <div class="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-500 flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-cake-candles"></i>
+                    </div>
+                    <div>
+                        <span class="text-zinc-400 block text-[10px] uppercase font-semibold">Birth Date</span>
+                        <span class="font-medium text-zinc-700">{{ profile.birth_date|date:"F d, Y" }}</span>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 text-sm">
+                    <div class="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-500 flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-map-pin"></i>
+                    </div>
+                    <div>
+                        <span class="text-zinc-400 block text-[10px] uppercase font-semibold">Address</span>
+                        <span class="font-medium text-zinc-700">{{ profile.address|default:"Not specified" }}</span>
+                    </div>
+                </div>
+                {% if profile.latitude and profile.longitude %}
+                <div class="flex items-start gap-3 text-sm">
+                    <div class="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-500 flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-globe"></i>
+                    </div>
+                    <div>
+                        <span class="text-zinc-400 block text-[10px] uppercase font-semibold">Coordinates</span>
+                        <span class="font-medium text-zinc-700">{{ profile.latitude|floatformat:4 }}, {{ profile.longitude|floatformat:4 }}</span>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="flex items-start gap-3 text-sm">
+                    <div class="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center text-zinc-500 flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </div>
+                    <div>
+                        <span class="text-zinc-400 block text-[10px] uppercase font-semibold">Joined Platform</span>
+                        <span class="font-medium text-zinc-700">{{ profile.created_at|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            {% if perms_map.can_delete_users %}
+            <div class="border-t border-zinc-100 pt-6 mt-4">
+                <button onclick="confirmDelete(
+                    'Delete user account for {{ profile.full_name }}? All hosted events, participation history, posts and files belonging to this user will be removed permanently.',
+                    () => document.getElementById('del-user-detail').submit()
+                )" class="w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-2xl text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-user-minus"></i> Delete Account
+                </button>
+                <form id="del-user-detail" action="{% url 'dashboard:user_delete' profile.pk %}" method="post" class="hidden">
+                    {% csrf_token %}
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- MIDDLE & RIGHT COLUMNS (2/3 width): Activity, Events & Reviews -->
+    <div class="lg:col-span-2 space-y-8">
+        
+        <!-- Hosted Events -->
+        <div class="bg-white rounded-3xl border border-zinc-100 p-8 shadow-sm">
+            <h2 class="text-xl font-semibold mb-6 text-zinc-800">Hosted Events (Recent)</h2>
+            {% if hosted_events %}
+            <div class="space-y-4">
+                {% for event in hosted_events %}
+                <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-zinc-50 hover:bg-zinc-100/50 border border-zinc-100/50 rounded-2xl transition-all gap-4">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2.5">
+                            <span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-[10px] font-semibold rounded uppercase tracking-wider">
+                                {{ event.category.name }}
+                            </span>
+                            <span class="text-xs text-zinc-400">{{ event.date|date:"M d, Y" }}</span>
+                        </div>
+                        <h4 class="font-semibold text-zinc-800 mt-1 truncate">{{ event.title }}</h4>
+                        <div class="flex items-center gap-4 text-xs text-zinc-500 mt-1">
+                            <span><i class="fa-solid fa-location-dot mr-1"></i>{{ event.city }}</span>
+                            <span><i class="fa-solid fa-clock mr-1"></i>{{ event.start_time|time:"H:i" }}–{{ event.end_time|time:"H:i" }}</span>
+                            {% if event.price > 0 %}
+                            <span>{{ event.price }} AED</span>
+                            {% else %}
+                            <span class="text-emerald-600 font-semibold">Free</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold
+                            {% if event.status == 'Available' %}bg-emerald-100 text-emerald-700
+                            {% elif event.status == 'Pending' %}bg-yellow-100 text-yellow-700
+                            {% elif event.status == 'Cancelled' %}bg-red-100 text-red-700
+                            {% else %}bg-zinc-100 text-zinc-600{% endif %}">
+                            {{ event.status }}
+                        </span>
+                        <a href="{% url 'dashboard:event_detail' event.pk %}" class="p-2 bg-white hover:bg-zinc-200 border border-zinc-200 rounded-xl text-zinc-500 transition-colors">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-10 bg-zinc-50/50 rounded-2xl border border-dashed border-zinc-200">
+                <p class="text-zinc-400 text-sm">This user hasn't hosted any events yet.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Host Reviews -->
+        <div class="bg-white rounded-3xl border border-zinc-100 p-8 shadow-sm">
+            <h2 class="text-xl font-semibold mb-6 text-zinc-800">Reviews & Ratings</h2>
+            {% if reviews %}
+            <div class="space-y-4">
+                {% for review in reviews %}
+                <div class="p-5 bg-zinc-50 border border-zinc-100/50 rounded-2xl">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 bg-zinc-200 text-zinc-600 font-bold rounded-lg flex items-center justify-center text-xs">
+                                {{ review.reviewer.full_name|first|upper }}
+                            </div>
+                            <div>
+                                <span class="font-semibold text-sm text-zinc-800 block leading-tight">{{ review.reviewer.full_name }}</span>
+                                <span class="text-[10px] text-zinc-400">Reviewer</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 text-amber-500 font-semibold text-sm">
+                            <span>{{ review.rating }}</span>
+                            <i class="fa-solid fa-star text-xs"></i>
+                        </div>
+                    </div>
+                    <p class="text-zinc-500 text-xs mt-2 italic">Submitted for event: <a href="{% url 'dashboard:event_detail' review.event.pk %}" class="text-yellow-600 hover:text-yellow-700 font-semibold">{{ review.event.title }}</a></p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-10 bg-zinc-50/50 rounded-2xl border border-dashed border-zinc-200">
+                <p class="text-zinc-400 text-sm">No reviews submitted for this user yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

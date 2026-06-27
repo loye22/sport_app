@@ -1,0 +1,66 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Hashtags{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-semibold">Hashtags</h1>
+    {% if perms_map.can_edit_hashtags %}
+    <button onclick="document.getElementById('new-tag-modal').classList.toggle('hidden')"
+            class="bg-yellow-400 hover:bg-yellow-500 text-white px-5 py-2.5 rounded-2xl text-sm font-medium transition-colors flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i> New Hashtag
+    </button>
+    {% endif %}
+</div>
+
+<!-- Create form (inline dropdown) -->
+{% if perms_map.can_edit_hashtags %}
+<div id="new-tag-modal" class="hidden bg-white rounded-3xl border border-zinc-100 p-6 mb-6">
+    <form action="{% url 'dashboard:hashtag_create' %}" method="post" class="flex items-center gap-3">
+        {% csrf_token %}
+        <span class="text-zinc-400 text-lg">#</span>
+        <input type="text" name="name" placeholder="hashtag name" autofocus
+               class="flex-1 border border-zinc-200 focus:border-yellow-300 rounded-2xl px-4 py-2.5 text-sm focus:outline-none">
+        <button type="submit"
+                class="bg-yellow-400 hover:bg-yellow-500 text-white px-5 py-2.5 rounded-2xl text-sm font-medium transition-colors">
+            Create
+        </button>
+        <button type="button" onclick="document.getElementById('new-tag-modal').classList.add('hidden')"
+                class="px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 rounded-2xl text-sm transition-colors">
+            Cancel
+        </button>
+    </form>
+</div>
+{% endif %}
+
+<div class="bg-white rounded-3xl border border-zinc-100 p-6">
+    {% if hashtags %}
+    <div class="flex flex-wrap gap-3">
+        {% for tag in hashtags %}
+        <div class="group flex items-center gap-2 bg-zinc-50 hover:bg-yellow-50 border border-zinc-200 hover:border-yellow-300 rounded-2xl px-4 py-2.5 transition-colors">
+            <span class="text-yellow-500 font-semibold text-sm">#</span>
+            <span class="font-medium text-sm">{{ tag.name }}</span>
+            <span class="text-xs text-zinc-400 bg-white border border-zinc-100 rounded-xl px-2 py-0.5">
+                {{ tag.post_count|default:0 }}p
+            </span>
+            {% if perms_map.can_delete_hashtags %}
+            <button onclick="confirmDelete(
+                'Delete hashtag #{{ tag.name }}?',
+                () => document.getElementById('del-tag-{{ tag.pk }}').submit()
+            )" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-all ml-1">
+                <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
+            <form id="del-tag-{{ tag.pk }}"
+                  action="{% url 'dashboard:hashtag_delete' tag.pk %}"
+                  method="post" class="hidden">{% csrf_token %}</form>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-16">
+        <div class="text-5xl mb-4">🏷️</div>
+        <p class="text-zinc-400">No hashtags yet</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -54,6 +54,12 @@ class UserProfile(models.Model):
     average_host_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
     saved_posts = models.ManyToManyField('Post', related_name='saved_by_users', blank=True)
     saved_reposts = models.ManyToManyField('Repost', related_name='saved_by_users', blank=True)
+    pythondashboard_role = models.CharField(
+        max_length=30,
+        choices=[('super_admin','Super Admin'),('moderator','Moderator'),
+                ('event_manager','Event Manager'),('content_moderator','Content Moderator')],
+        null=True, blank=True
+    )
 
 
 

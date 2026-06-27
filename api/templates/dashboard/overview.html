@@ -1,0 +1,156 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Overview{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex justify-between items-end mb-8">
+    <div>
+        <h1 class="text-4xl font-semibold tracking-tighter">Dashboard Overview</h1>
+        <p class="text-zinc-500 mt-1">Real-time insights from your SportSphere platform</p>
+    </div>
+    <div class="bg-white px-5 py-3 rounded-3xl border border-zinc-200 flex items-center gap-x-2 text-sm font-medium">
+        <i class="fa-solid fa-calendar text-yellow-500"></i>
+        <span id="current-date"></span>
+    </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="grid grid-cols-4 gap-6">
+    <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100">
+        <div class="flex justify-between items-start">
+            <div>
+                <div class="text-sm text-zinc-500">Total Users</div>
+                <div class="stat-number text-5xl font-semibold mt-3">{{ total_users|default:"0" }}</div>
+            </div>
+            <div class="text-4xl">👥</div>
+        </div>
+        <div class="mt-6 text-emerald-600 flex items-center gap-1 text-sm">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+            +{{ users_this_week }} this week
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100">
+        <div class="flex justify-between items-start">
+            <div>
+                <div class="text-sm text-zinc-500">Active Events</div>
+                <div class="stat-number text-5xl font-semibold mt-3">{{ active_events|default:"0" }}</div>
+            </div>
+            <div class="text-4xl">🏟️</div>
+        </div>
+        <div class="mt-6 text-emerald-600 flex items-center gap-1 text-sm">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+            {{ events_today }} today
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100">
+        <div class="flex justify-between items-start">
+            <div>
+                <div class="text-sm text-zinc-500">Posts</div>
+                <div class="stat-number text-5xl font-semibold mt-3">{{ total_posts|default:"0" }}</div>
+            </div>
+            <div class="text-4xl">📸</div>
+        </div>
+        <div class="mt-6 text-amber-600 flex items-center gap-1 text-sm">
+            <i class="fa-solid fa-arrow-trend-up"></i> Trending
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100">
+        <div class="flex justify-between items-start">
+            <div>
+                <div class="text-sm text-zinc-500">Avg Host Rating</div>
+                <div class="stat-number text-5xl font-semibold mt-3">{{ avg_rating|floatformat:2|default:"—" }}</div>
+            </div>
+            <div class="text-4xl">⭐</div>
+        </div>
+        <div class="mt-6 text-emerald-600 flex items-center gap-1 text-sm">
+            Excellent feedback
+        </div>
+    </div>
+</div>
+
+<!-- Pending Alerts -->
+{% if pending_reports_count or pending_delete_count %}
+<div class="mt-8 grid grid-cols-2 gap-6">
+    {% if pending_reports_count %}
+    <a href="{% url 'dashboard:reports' %}"
+       class="flex items-center gap-4 bg-red-50 border border-red-100 rounded-3xl p-5 hover:bg-red-100 transition-colors">
+        <div class="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center">
+            <i class="fa-solid fa-flag text-red-500 text-lg"></i>
+        </div>
+        <div>
+            <div class="font-semibold text-red-700">{{ pending_reports_count }} Pending Reports</div>
+            <div class="text-xs text-red-400">Click to review flagged content</div>
+        </div>
+        <i class="fa-solid fa-arrow-right ml-auto text-red-400"></i>
+    </a>
+    {% endif %}
+
+    {% if pending_delete_count %}
+    <a href="{% url 'dashboard:delete_requests' %}"
+       class="flex items-center gap-4 bg-amber-50 border border-amber-100 rounded-3xl p-5 hover:bg-amber-100 transition-colors">
+        <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center">
+            <i class="fa-solid fa-user-minus text-amber-500 text-lg"></i>
+        </div>
+        <div>
+            <div class="font-semibold text-amber-700">{{ pending_delete_count }} Delete Requests</div>
+            <div class="text-xs text-amber-400">Click to process account deletion requests</div>
+        </div>
+        <i class="fa-solid fa-arrow-right ml-auto text-amber-400"></i>
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Recent Events -->
+<div class="mt-10">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold">Recent Events</h2>
+        {% if perms_map.can_view_events %}
+        <a href="{% url 'dashboard:events' %}" class="text-sm text-yellow-600 hover:text-yellow-700 font-medium">
+            View all <i class="fa-solid fa-arrow-right ml-1"></i>
+        </a>
+        {% endif %}
+    </div>
+
+    {% if recent_events %}
+    <div class="grid grid-cols-3 gap-6">
+        {% for event in recent_events %}
+        <div class="bg-white rounded-3xl overflow-hidden card-hover border border-zinc-100">
+            {% if event.image %}
+            <img src="{{ event.image }}" class="w-full h-44 object-cover" alt="{{ event.title }}">
+            {% else %}
+            <div class="w-full h-44 bg-gradient-to-br from-yellow-100 to-yellow-200 flex items-center justify-center text-5xl">🏟️</div>
+            {% endif %}
+            <div class="p-6">
+                <div class="font-semibold truncate">{{ event.title }}</div>
+                <div class="text-sm text-zinc-500 mt-1">{{ event.host.full_name }} • {{ event.date|date:"d M" }}</div>
+                <div class="flex justify-between items-center mt-4 text-sm">
+                    <span class="text-zinc-500">{{ event.city }}</span>
+                    <span class="px-3 py-1 rounded-2xl text-xs font-medium
+                        {% if event.status == 'Available' %}bg-emerald-100 text-emerald-700
+                        {% elif event.status == 'Pending' %}bg-yellow-100 text-yellow-700
+                        {% elif event.status == 'Cancelled' %}bg-red-100 text-red-700
+                        {% else %}bg-zinc-100 text-zinc-600{% endif %}">
+                        {{ event.status }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-3xl p-12 text-center border border-zinc-100">
+        <div class="text-5xl mb-4">🏟️</div>
+        <p class="text-zinc-400">No events yet</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    document.getElementById('current-date').textContent =
+        new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+</script>
+{% endblock %}

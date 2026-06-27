@@ -1,0 +1,92 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Additional Option — {{ opt.get_type_display }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'dashboard:additional_options' %}" class="inline-flex items-center gap-2 text-zinc-500 hover:text-zinc-800 text-sm font-medium mb-6 transition-colors">
+    <i class="fa-solid fa-arrow-left"></i> Back to Additional Options
+</a>
+
+<div class="bg-white rounded-3xl border border-zinc-100 overflow-hidden shadow-sm">
+    <div class="p-8 border-b border-zinc-100">
+        <span class="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-xl text-xs font-medium capitalize">
+            {{ opt.get_type_display }}
+        </span>
+        <h1 class="text-3xl font-bold text-zinc-800 mt-3">{{ opt.get_type_display }}</h1>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-zinc-100">
+        <div class="p-6">
+            <span class="text-xs text-zinc-400 uppercase tracking-wider block mb-1">Price</span>
+            <span class="text-lg font-semibold text-zinc-800">{{ opt.price }} AED</span>
+        </div>
+        <div class="p-6">
+            <span class="text-xs text-zinc-400 uppercase tracking-wider block mb-1">Event</span>
+            {% if opt.event %}
+            <a href="{% url 'dashboard:event_detail' opt.event.pk %}" class="text-lg font-semibold text-yellow-600 hover:text-yellow-700">
+                {{ opt.event.title }}
+            </a>
+            {% else %}
+            <span class="text-lg font-semibold text-zinc-400">—</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="p-8 border-t border-zinc-100">
+        <h2 class="text-lg font-semibold text-zinc-800 mb-3">Description</h2>
+        <p class="text-zinc-600 leading-relaxed whitespace-pre-wrap">{{ opt.description|default:"No description provided." }}</p>
+    </div>
+
+    {% if opt.image %}
+    <div class="p-8 border-t border-zinc-100">
+        <h2 class="text-lg font-semibold text-zinc-800 mb-3">Image</h2>
+        <img src="{{ opt.image }}" alt="{{ opt.get_type_display }}" class="max-h-64 rounded-2xl object-cover">
+    </div>
+    {% endif %}
+
+    {% if opt.is_other %}
+    <div class="p-8 border-t border-zinc-100 bg-zinc-50/50">
+        <h2 class="text-lg font-semibold text-zinc-800 mb-4">Other Option Details</h2>
+        <dl class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            {% if opt.other_title %}
+            <div>
+                <dt class="text-zinc-400 mb-1">Title</dt>
+                <dd class="font-medium text-zinc-800">{{ opt.other_title }}</dd>
+            </div>
+            {% endif %}
+            {% if opt.other_price %}
+            <div>
+                <dt class="text-zinc-400 mb-1">Other Price</dt>
+                <dd class="font-medium text-zinc-800">{{ opt.other_price }} AED</dd>
+            </div>
+            {% endif %}
+            {% if opt.other_description %}
+            <div class="md:col-span-2">
+                <dt class="text-zinc-400 mb-1">Other Description</dt>
+                <dd class="text-zinc-600 whitespace-pre-wrap">{{ opt.other_description }}</dd>
+            </div>
+            {% endif %}
+            {% if opt.other_image_url %}
+            <div class="md:col-span-2">
+                <dt class="text-zinc-400 mb-1">Other Image</dt>
+                <dd><img src="{{ opt.other_image_url }}" alt="Other option" class="max-h-48 rounded-2xl object-cover mt-2"></dd>
+            </div>
+            {% endif %}
+        </dl>
+    </div>
+    {% endif %}
+
+    {% if perms_map.can_delete_additional_options %}
+    <div class="p-8 border-t border-zinc-100 flex justify-end">
+        <button onclick="confirmDelete(
+            'Delete this additional option?',
+            () => document.getElementById('del-opt').submit()
+        )" class="px-4 py-2 text-sm bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-medium transition-colors">
+            Delete Option
+        </button>
+        <form id="del-opt"
+              action="{% url 'dashboard:additional_option_delete' opt.pk %}"
+              method="post" class="hidden">{% csrf_token %}</form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

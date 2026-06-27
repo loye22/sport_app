@@ -1,0 +1,74 @@
+<div class="bg-white rounded-3xl border border-zinc-100 card-hover overflow-hidden">
+    <!-- Image strip -->
+    {% if event.image %}
+    <img src="{{ event.image }}" class="w-full h-36 object-cover" alt="{{ event.title }}">
+    {% else %}
+    <div class="w-full h-16 bg-gradient-to-r from-yellow-100 to-yellow-50"></div>
+    {% endif %}
+
+    <div class="p-6">
+        <div class="flex justify-between items-start gap-3">
+            <div class="flex-1 min-w-0">
+                <div class="font-semibold truncate">{{ event.title }}</div>
+                <div class="text-sm text-zinc-500 mt-0.5">
+                    {{ event.date|date:"d M Y" }} • {{ event.start_time|time:"H:i" }}–{{ event.end_time|time:"H:i" }}
+                </div>
+            </div>
+            <span class="flex-shrink-0 px-3 py-1 rounded-2xl text-xs font-medium
+                {% if event.status == 'Available' %}bg-emerald-100 text-emerald-700
+                {% elif event.status == 'Pending' %}bg-yellow-100 text-yellow-700
+                {% elif event.status == 'Cancelled' %}bg-red-100 text-red-700
+                {% else %}bg-zinc-100 text-zinc-600{% endif %}">
+                {{ event.status }}
+            </span>
+        </div>
+
+        <div class="mt-4 flex items-center gap-4 text-sm text-zinc-500">
+            <span><i class="fa-solid fa-location-dot mr-1 text-zinc-400"></i>{{ event.city }}</span>
+            <span><i class="fa-solid fa-user mr-1 text-zinc-400"></i>{{ event.host.full_name }}</span>
+            {% if event.price > 0 %}
+            <span><i class="fa-solid fa-tag mr-1 text-zinc-400"></i>{{ event.price }} AED</span>
+            {% else %}
+            <span class="text-emerald-600 font-medium">Free</span>
+            {% endif %}
+        </div>
+
+        <div class="mt-5 flex items-center gap-2">
+            <a href="{% url 'dashboard:event_detail' event.pk %}"
+               class="flex-1 text-center py-2 bg-zinc-100 hover:bg-zinc-200 rounded-xl text-xs font-medium transition-colors">
+                View
+            </a>
+
+            {% if event.status == 'Available' %}
+            <button onclick="document.getElementById('cancel-form-{{ event.pk }}').classList.toggle('hidden')"
+                    class="flex-1 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl text-xs font-medium transition-colors">
+                Cancel
+            </button>
+            {% endif %}
+
+            <button onclick="confirmDelete(
+                'Delete event \'{{ event.title }}\' permanently?',
+                () => document.getElementById('del-event-{{ event.pk }}').submit()
+            )" class="flex-1 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-medium transition-colors">
+                Delete
+            </button>
+            <form id="del-event-{{ event.pk }}"
+                  action="{% url 'dashboard:event_delete' event.pk %}"
+                  method="post" class="hidden">{% csrf_token %}</form>
+        </div>
+
+        <!-- Inline cancel form -->
+        <form id="cancel-form-{{ event.pk }}"
+              action="{% url 'dashboard:event_cancel' event.pk %}"
+              method="post"
+              class="hidden mt-3">
+            {% csrf_token %}
+            <input type="text" name="reason" placeholder="Cancellation reason…"
+                   class="w-full border border-zinc-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-yellow-300 mb-2">
+            <button type="submit"
+                    class="w-full py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-xl text-xs font-medium transition-colors">
+                Confirm Cancel
+            </button>
+        </form>
+    </div>
+</div>

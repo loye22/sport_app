@@ -1,0 +1,102 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Users{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-semibold">Users</h1>
+    <span class="text-zinc-400 text-sm">{{ users|length }} result{{ users|length|pluralize }}</span>
+</div>
+
+<!-- Filters -->
+<form method="get" class="flex items-center gap-3 mb-6">
+    <div class="relative flex-1 max-w-sm">
+        <input type="text" name="q" value="{{ search_q }}"
+               placeholder="Search name, email…"
+               class="w-full bg-white border border-zinc-200 focus:border-yellow-300 rounded-2xl py-2.5 pl-10 pr-4 text-sm focus:outline-none">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-zinc-400 text-sm"></i>
+    </div>
+    <select name="gender"
+            class="bg-white border border-zinc-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-yellow-300">
+        <option value="">All genders</option>
+        <option value="Male"   {% if gender_f == 'Male' %}selected{% endif %}>Male</option>
+        <option value="Female" {% if gender_f == 'Female' %}selected{% endif %}>Female</option>
+    </select>
+    <button type="submit"
+            class="bg-yellow-400 hover:bg-yellow-500 text-white px-5 py-2.5 rounded-2xl text-sm font-medium transition-colors">
+        Filter
+    </button>
+    {% if search_q or gender_f %}
+    <a href="{% url 'dashboard:users' %}"
+       class="text-sm text-zinc-400 hover:text-zinc-600 px-3">Clear</a>
+    {% endif %}
+</form>
+
+<!-- Table -->
+<div class="bg-white rounded-3xl overflow-hidden border border-zinc-100">
+    {% if users %}
+    <table class="w-full">
+        <thead>
+            <tr class="bg-zinc-50 border-b border-zinc-100">
+                <th class="px-6 py-4 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Email</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Gender</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Joined</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Rating</th>
+                <th class="px-6 py-4 text-right text-xs font-semibold text-zinc-500 uppercase tracking-wider">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-50">
+            {% for profile in users %}
+            <tr class="hover:bg-zinc-50 transition-colors">
+                <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 bg-yellow-100 rounded-xl flex items-center justify-center text-yellow-600 font-bold text-sm flex-shrink-0">
+                            {{ profile.full_name|first|upper }}
+                        </div>
+                        <div>
+                            <div class="font-medium text-sm">{{ profile.full_name }}</div>
+                            <div class="text-xs text-zinc-400">{{ profile.phone_number }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-zinc-600">{{ profile.email }}</td>
+                <td class="px-6 py-4 text-sm text-zinc-600">{{ profile.gender }}</td>
+                <td class="px-6 py-4 text-sm text-zinc-400">{{ profile.created_at|date:"M d, Y" }}</td>
+                <td class="px-6 py-4">
+                    <span class="text-amber-500 font-medium text-sm">
+                        {{ profile.average_host_rating }} ★
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                        {% if perms_map.can_view_users %}
+                        <a href="{% url 'dashboard:user_detail' profile.pk %}"
+                           class="px-3 py-1.5 text-xs bg-zinc-100 hover:bg-zinc-200 rounded-xl font-medium transition-colors">
+                            View
+                        </a>
+                        {% endif %}
+                        {% if perms_map.can_delete_users %}
+                        <button onclick="confirmDelete(
+                            'Delete user {{ profile.full_name }}? This is permanent.',
+                            () => document.getElementById('del-user-{{ profile.pk }}').submit()
+                        )" class="px-3 py-1.5 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-medium transition-colors">
+                            Delete
+                        </button>
+                        <form id="del-user-{{ profile.pk }}"
+                              action="{% url 'dashboard:user_delete' profile.pk %}"
+                              method="post" class="hidden">{% csrf_token %}</form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="py-20 text-center">
+        <div class="text-5xl mb-4">👤</div>
+        <p class="text-zinc-400">No users found{% if search_q %} for "{{ search_q }}"{% endif %}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
