@@ -3,7 +3,7 @@
 
 {% block content %}
 <!-- Back link -->
-<a href="{% url 'dashboard:events' %}" class="inline-flex items-center gap-2 text-zinc-500 hover:text-zinc-800 text-sm font-medium mb-6 transition-colors">
+<a href="{% url 'dashboard:events' %}" class="inline-flex items-center gap-2 text-zinc-500 hover:text-black text-sm font-medium mb-6 transition-colors">
     <i class="fa-solid fa-arrow-left"></i> Back to Events
 </a>
 
@@ -20,22 +20,24 @@
                 <img src="{{ event.image }}" class="w-full h-full object-cover" alt="{{ event.title }}">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                 <div class="absolute bottom-6 left-6 right-6 text-white">
-                    <span class="px-3 py-1 bg-yellow-400 text-zinc-900 text-xs font-semibold rounded-full uppercase tracking-wider">
+                    <!-- Category badge – changed from yellow to dark -->
+                    <span class="px-3 py-1 bg-zinc-800 text-white text-xs font-semibold rounded-full uppercase tracking-wider">
                         {{ event.category.name }}
                     </span>
                     <h1 class="text-3xl font-bold mt-2">{{ event.title }}</h1>
                 </div>
             </div>
             {% else %}
-            <div class="p-8 bg-gradient-to-r from-yellow-50 to-zinc-50 border-b border-zinc-100">
-                <span class="px-3 py-1 bg-yellow-400 text-zinc-900 text-xs font-semibold rounded-full uppercase tracking-wider">
+            <!-- No image – gradient changed from yellow to zinc -->
+            <div class="p-8 bg-gradient-to-r from-zinc-100 to-zinc-50 border-b border-zinc-100">
+                <span class="px-3 py-1 bg-zinc-800 text-white text-xs font-semibold rounded-full uppercase tracking-wider">
                     {{ event.category.name }}
                 </span>
                 <h1 class="text-3xl font-bold mt-3 text-zinc-800">{{ event.title }}</h1>
             </div>
             {% endif %}
             
-            <!-- Quick stats bar -->
+            <!-- Quick stats bar (unchanged) -->
             <div class="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-zinc-100 bg-zinc-50/50">
                 <div class="p-5 text-center">
                     <span class="text-xs text-zinc-400 block mb-1">Status</span>
@@ -66,13 +68,13 @@
             </div>
         </div>
 
-        <!-- Event Description -->
+        <!-- Event Description (unchanged) -->
         <div class="bg-white rounded-3xl border border-zinc-100 p-8 shadow-sm">
             <h2 class="text-xl font-semibold mb-4 text-zinc-800">Event Description</h2>
             <p class="text-zinc-600 leading-relaxed whitespace-pre-wrap">{{ event.description|default:"No description provided." }}</p>
         </div>
 
-        <!-- Venue details -->
+        <!-- Venue details (unchanged) -->
         {% if event.Venue %}
         <div class="bg-white rounded-3xl border border-zinc-100 p-8 shadow-sm">
             <div class="flex justify-between items-start mb-6">
@@ -106,12 +108,11 @@
         </div>
         {% endif %}
 
-        <!-- Teams Section -->
+        <!-- Teams Section – all player avatars and ratings changed to zinc -->
         <div class="bg-white rounded-3xl border border-zinc-100 p-8 shadow-sm">
             <h2 class="text-xl font-semibold mb-6 text-zinc-800">Teams & Players</h2>
             
             <div class="space-y-8">
-                <!-- Loop over allowed teams based on teams_number -->
                 {% with teams_count=event.teams_number %}
                 
                 <!-- Team A -->
@@ -127,14 +128,16 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {% for player in event.team_a_members.all %}
                         <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
-                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                            <!-- Avatar – changed from yellow to zinc -->
+                            <div class="w-8 h-8 bg-zinc-200 text-zinc-700 font-bold rounded-lg flex items-center justify-center text-xs">
                                 {{ player.full_name|first|upper }}
                             </div>
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
                                 <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
                             </div>
-                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                            <!-- Rating stars – changed from amber to zinc -->
+                            <span class="text-xs text-zinc-600 font-medium">{{ player.average_host_rating }} ★</span>
                         </a>
                         {% endfor %}
                     </div>
@@ -144,7 +147,7 @@
                 </div>
                 {% endif %}
 
-                <!-- Team B -->
+                <!-- Team B (same changes) -->
                 {% if teams_count >= 2 %}
                 <div class="pt-4">
                     <div class="flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
@@ -157,14 +160,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {% for player in event.team_b_members.all %}
                         <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
-                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                            <div class="w-8 h-8 bg-zinc-200 text-zinc-700 font-bold rounded-lg flex items-center justify-center text-xs">
                                 {{ player.full_name|first|upper }}
                             </div>
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
                                 <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
                             </div>
-                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                            <span class="text-xs text-zinc-600 font-medium">{{ player.average_host_rating }} ★</span>
                         </a>
                         {% endfor %}
                     </div>
@@ -174,7 +177,7 @@
                 </div>
                 {% endif %}
 
-                <!-- Team C -->
+                <!-- Team C – same changes -->
                 {% if teams_count >= 3 %}
                 <div class="pt-4">
                     <div class="flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
@@ -187,14 +190,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {% for player in event.team_c_members.all %}
                         <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
-                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                            <div class="w-8 h-8 bg-zinc-200 text-zinc-700 font-bold rounded-lg flex items-center justify-center text-xs">
                                 {{ player.full_name|first|upper }}
                             </div>
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
                                 <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
                             </div>
-                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                            <span class="text-xs text-zinc-600 font-medium">{{ player.average_host_rating }} ★</span>
                         </a>
                         {% endfor %}
                     </div>
@@ -204,7 +207,7 @@
                 </div>
                 {% endif %}
 
-                <!-- Team D -->
+                <!-- Team D – same -->
                 {% if teams_count >= 4 %}
                 <div class="pt-4">
                     <div class="flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
@@ -217,14 +220,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {% for player in event.team_d_members.all %}
                         <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
-                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                            <div class="w-8 h-8 bg-zinc-200 text-zinc-700 font-bold rounded-lg flex items-center justify-center text-xs">
                                 {{ player.full_name|first|upper }}
                             </div>
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
                                 <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
                             </div>
-                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                            <span class="text-xs text-zinc-600 font-medium">{{ player.average_host_rating }} ★</span>
                         </a>
                         {% endfor %}
                     </div>
@@ -234,7 +237,7 @@
                 </div>
                 {% endif %}
 
-                <!-- Team E -->
+                <!-- Team E – same -->
                 {% if teams_count >= 5 %}
                 <div class="pt-4">
                     <div class="flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
@@ -247,14 +250,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {% for player in event.team_e_members.all %}
                         <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
-                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                            <div class="w-8 h-8 bg-zinc-200 text-zinc-700 font-bold rounded-lg flex items-center justify-center text-xs">
                                 {{ player.full_name|first|upper }}
                             </div>
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
                                 <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
                             </div>
-                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                            <span class="text-xs text-zinc-600 font-medium">{{ player.average_host_rating }} ★</span>
                         </a>
                         {% endfor %}
                     </div>
@@ -264,7 +267,7 @@
                 </div>
                 {% endif %}
 
-                <!-- Team F -->
+                <!-- Team F – same -->
                 {% if teams_count >= 6 %}
                 <div class="pt-4">
                     <div class="flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
@@ -277,14 +280,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {% for player in event.team_f_members.all %}
                         <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
-                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                            <div class="w-8 h-8 bg-zinc-200 text-zinc-700 font-bold rounded-lg flex items-center justify-center text-xs">
                                 {{ player.full_name|first|upper }}
                             </div>
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
                                 <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
                             </div>
-                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                            <span class="text-xs text-zinc-600 font-medium">{{ player.average_host_rating }} ★</span>
                         </a>
                         {% endfor %}
                     </div>
@@ -294,7 +297,7 @@
                 </div>
                 {% endif %}
 
-                <!-- Team G -->
+                <!-- Team G – same -->
                 {% if teams_count >= 7 %}
                 <div class="pt-4">
                     <div class="flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
@@ -307,14 +310,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {% for player in event.team_g_members.all %}
                         <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
-                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                            <div class="w-8 h-8 bg-zinc-200 text-zinc-700 font-bold rounded-lg flex items-center justify-center text-xs">
                                 {{ player.full_name|first|upper }}
                             </div>
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
                                 <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
                             </div>
-                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                            <span class="text-xs text-zinc-600 font-medium">{{ player.average_host_rating }} ★</span>
                         </a>
                         {% endfor %}
                     </div>
@@ -324,7 +327,7 @@
                 </div>
                 {% endif %}
 
-                <!-- Team H -->
+                <!-- Team H – same -->
                 {% if teams_count >= 8 %}
                 <div class="pt-4">
                     <div class="flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
@@ -337,14 +340,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {% for player in event.team_h_members.all %}
                         <a href="{% url 'dashboard:user_detail' player.pk %}" class="flex items-center gap-3 p-3 hover:bg-zinc-50 border border-zinc-50 hover:border-zinc-100 rounded-2xl transition-all">
-                            <div class="w-8 h-8 bg-yellow-100 text-yellow-700 font-bold rounded-lg flex items-center justify-center text-xs">
+                            <div class="w-8 h-8 bg-zinc-200 text-zinc-700 font-bold rounded-lg flex items-center justify-center text-xs">
                                 {{ player.full_name|first|upper }}
                             </div>
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-medium text-zinc-700 truncate">{{ player.full_name }}</p>
                                 <p class="text-xs text-zinc-400 truncate">{{ player.email }}</p>
                             </div>
-                            <span class="text-xs text-amber-500 font-medium">{{ player.average_host_rating }} ★</span>
+                            <span class="text-xs text-zinc-600 font-medium">{{ player.average_host_rating }} ★</span>
                         </a>
                         {% endfor %}
                     </div>
@@ -408,8 +411,9 @@
             
             <div class="border-t border-zinc-100 pt-6">
                 <span class="text-zinc-400 block text-xs mb-3">Event Host</span>
+                <!-- Host avatar changed from yellow to zinc -->
                 <a href="{% url 'dashboard:user_detail' event.host.pk %}" class="flex items-center gap-3 p-3 bg-zinc-50 hover:bg-zinc-100/70 border border-zinc-100/50 rounded-2xl transition-all">
-                    <div class="w-10 h-10 bg-yellow-400 text-white font-bold rounded-xl flex items-center justify-center text-sm">
+                    <div class="w-10 h-10 bg-zinc-200 text-zinc-700 font-bold rounded-xl flex items-center justify-center text-sm">
                         {{ event.host.full_name|first|upper }}
                     </div>
                     <div class="min-w-0 flex-1">
@@ -428,20 +432,21 @@
             {% endif %}
         </div>
 
-        <!-- Management Actions -->
+        <!-- Management Actions – changed amber to zinc/black -->
         <div class="bg-white rounded-3xl border border-zinc-100 p-6 shadow-sm space-y-4">
             <h3 class="font-semibold text-zinc-800 text-lg mb-2">Management</h3>
             
             {% if perms_map.can_edit_events and event.status == 'Available' %}
+            <!-- Cancel button – amber → zinc -->
             <button onclick="document.getElementById('cancel-form-detail').classList.toggle('hidden')"
-                    class="w-full py-3 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-2xl text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+                    class="w-full py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-2xl text-sm font-semibold transition-colors flex items-center justify-center gap-2">
                 <i class="fa-solid fa-ban"></i> Cancel Event
             </button>
             <form id="cancel-form-detail" action="{% url 'dashboard:event_cancel' event.pk %}" method="post" class="hidden space-y-2 mt-2">
                 {% csrf_token %}
                 <textarea name="reason" placeholder="Explain the cancellation reason..." rows="3"
-                          class="w-full border border-zinc-200 rounded-2xl p-3 text-sm focus:outline-none focus:border-yellow-300 resize-none"></textarea>
-                <button type="submit" class="w-full py-2.5 bg-amber-400 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold transition-colors">
+                          class="w-full border border-zinc-200 rounded-2xl p-3 text-sm focus:outline-none focus:border-zinc-400 resize-none"></textarea>
+                <button type="submit" class="w-full py-2.5 bg-zinc-800 hover:bg-black text-white rounded-xl text-xs font-semibold transition-colors">
                     Confirm Cancellation
                 </button>
             </form>
@@ -460,7 +465,7 @@
             {% endif %}
         </div>
 
-        <!-- Event Stats Details (If stats exist) -->
+        <!-- Event Stats Details (unchanged, except yellow card text may stay because it's semantic) -->
         {% if event.event_stats %}
         <div class="bg-white rounded-3xl border border-zinc-100 p-6 shadow-sm space-y-4">
             <h3 class="font-semibold text-zinc-800 text-lg mb-2">Match Statistics</h3>
@@ -545,7 +550,7 @@
                         <span class="font-semibold text-zinc-700">{{ event.event_stats.team_b_corners }}</span>
                     </div>
 
-                    <!-- Yellow / Red cards -->
+                    <!-- Yellow / Red cards – keeping yellow and red for card colors (semantic) -->
                     <div class="flex justify-between text-sm py-1 border-t border-zinc-50">
                         <span class="font-semibold text-yellow-600"><i class="fa-solid fa-square mr-1"></i>{{ event.event_stats.team_a_yellow_cards }} <span class="text-red-500 ml-2"><i class="fa-solid fa-square mr-1"></i>{{ event.event_stats.team_a_red_cards }}</span></span>
                         <span class="text-xs text-zinc-400">Cards (Y/R)</span>

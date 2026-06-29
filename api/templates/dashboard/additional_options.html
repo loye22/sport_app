@@ -9,18 +9,19 @@
 <!-- Type filter -->
 <form method="get" class="flex gap-3 mb-6">
     <select name="type"
-            class="bg-white border border-zinc-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-yellow-300">
+            class="bg-white border border-zinc-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-zinc-400">
         <option value="">All types</option>
         {% for val, label in type_choices %}
         <option value="{{ val }}" {% if type_f == val %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
     </select>
+    <!-- Filter button – changed from yellow to dark gray -->
     <button type="submit"
-            class="bg-yellow-400 hover:bg-yellow-500 text-white px-5 py-2.5 rounded-2xl text-sm font-medium transition-colors">
+            class="bg-zinc-800 hover:bg-black text-white px-5 py-2.5 rounded-2xl text-sm font-medium transition-colors">
         Filter
     </button>
     {% if type_f %}
-    <a href="{% url 'dashboard:additional_options' %}" class="text-sm text-zinc-400 hover:text-zinc-600 px-2 self-center">Clear</a>
+    <a href="{% url 'dashboard:additional_options' %}" class="text-sm text-zinc-400 hover:text-black px-2 self-center transition-colors">Clear</a>
     {% endif %}
 </form>
 
@@ -40,7 +41,8 @@
             {% for opt in options %}
             <tr class="hover:bg-zinc-50 transition-colors">
                 <td class="px-6 py-4">
-                    <span class="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-xl text-xs font-medium capitalize">
+                    <!-- Type badge – changed from yellow to gray -->
+                    <span class="px-3 py-1 bg-zinc-100 text-zinc-700 rounded-xl text-xs font-medium capitalize">
                         {{ opt.get_type_display }}
                     </span>
                 </td>

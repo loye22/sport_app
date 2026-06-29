@@ -2,8 +2,8 @@
 {% block title %}User Profile — {{ profile.full_name }}{% endblock %}
 
 {% block content %}
-<!-- Back link -->
-<a href="{% url 'dashboard:users' %}" class="inline-flex items-center gap-2 text-zinc-500 hover:text-zinc-800 text-sm font-medium mb-6 transition-colors">
+<!-- Back link – hover changed to black -->
+<a href="{% url 'dashboard:users' %}" class="inline-flex items-center gap-2 text-zinc-500 hover:text-black text-sm font-medium mb-6 transition-colors">
     <i class="fa-solid fa-arrow-left"></i> Back to Users
 </a>
 
@@ -15,15 +15,16 @@
         
         <!-- Main Profile Info -->
         <div class="bg-white rounded-3xl border border-zinc-100 p-8 shadow-sm text-center relative overflow-hidden">
-            <!-- Background banner effect -->
-            <div class="absolute top-0 left-0 right-0 h-24 bg-gradient-to-r from-yellow-100 to-yellow-50"></div>
+            <!-- Background banner effect – changed from yellow to zinc -->
+            <div class="absolute top-0 left-0 right-0 h-24 bg-gradient-to-r from-zinc-100 to-zinc-50"></div>
             
             <!-- Avatar -->
             <div class="relative mt-8 mb-4 inline-block">
                 {% if profile.profile_picture %}
                 <img src="{{ profile.profile_picture }}" class="w-24 h-24 rounded-3xl object-cover mx-auto border-4 border-white shadow-md" alt="{{ profile.full_name }}">
                 {% else %}
-                <div class="w-24 h-24 rounded-3xl bg-yellow-400 text-white text-3xl font-bold flex items-center justify-center mx-auto border-4 border-white shadow-md">
+                <!-- Fallback avatar – changed from yellow to dark -->
+                <div class="w-24 h-24 rounded-3xl bg-zinc-800 text-white text-3xl font-bold flex items-center justify-center mx-auto border-4 border-white shadow-md">
                     {{ profile.full_name|first|upper }}
                 </div>
                 {% endif %}
@@ -32,14 +33,14 @@
             <h1 class="text-2xl font-bold text-zinc-800">{{ profile.full_name }}</h1>
             <p class="text-zinc-400 text-sm mt-1">{{ profile.user.username }}</p>
             
-            <!-- Rating -->
-            <div class="flex items-center justify-center gap-1.5 mt-3 text-amber-500 font-semibold text-lg">
+            <!-- Rating – changed from amber to zinc -->
+            <div class="flex items-center justify-center gap-1.5 mt-3 text-zinc-700 font-semibold text-lg">
                 <span>{{ profile.average_host_rating }}</span>
                 <i class="fa-solid fa-star text-sm"></i>
                 <span class="text-zinc-300 font-normal text-xs ml-1">Host Rating</span>
             </div>
 
-            <!-- Followers/Following count -->
+            <!-- Followers/Following count (unchanged) -->
             <div class="grid grid-cols-2 divide-x divide-zinc-100 border-t border-b border-zinc-50 py-4 my-6">
                 <div>
                     <span class="font-bold text-zinc-700 block text-lg">{{ profile.followers.count }}</span>
@@ -51,7 +52,7 @@
                 </div>
             </div>
 
-            <!-- User Status & Role -->
+            <!-- User Status & Role – changed yellow badge to zinc -->
             <div class="flex justify-center gap-2 mb-2">
                 {% if profile.user.is_superuser %}
                 <span class="px-2.5 py-1 bg-purple-50 border border-purple-200 text-purple-700 text-xs font-semibold rounded-lg">
@@ -64,14 +65,15 @@
                 {% endif %}
 
                 {% if profile.pythondashboard_role %}
-                <span class="px-2.5 py-1 bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs font-semibold rounded-lg">
+                <!-- Role badge – changed to zinc -->
+                <span class="px-2.5 py-1 bg-zinc-100 border border-zinc-200 text-zinc-700 text-xs font-semibold rounded-lg">
                     {{ profile.pythondashboard_role }}
                 </span>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Personal Details -->
+        <!-- Personal Details (unchanged) -->
         <div class="bg-white rounded-3xl border border-zinc-100 p-6 shadow-sm space-y-4">
             <h3 class="font-semibold text-zinc-800 text-lg mb-2">Personal Details</h3>
             <div class="space-y-4">
@@ -170,7 +172,8 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-zinc-50 hover:bg-zinc-100/50 border border-zinc-100/50 rounded-2xl transition-all gap-4">
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2.5">
-                            <span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-[10px] font-semibold rounded uppercase tracking-wider">
+                            <!-- Event category badge – changed from yellow to zinc -->
+                            <span class="px-2 py-0.5 bg-zinc-100 text-zinc-700 text-[10px] font-semibold rounded uppercase tracking-wider">
                                 {{ event.category.name }}
                             </span>
                             <span class="text-xs text-zinc-400">{{ event.date|date:"M d, Y" }}</span>
@@ -225,12 +228,18 @@
                                 <span class="text-[10px] text-zinc-400">Reviewer</span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-1 text-amber-500 font-semibold text-sm">
+                        <!-- Review stars – changed from amber to zinc -->
+                        <div class="flex items-center gap-1 text-zinc-700 font-semibold text-sm">
                             <span>{{ review.rating }}</span>
                             <i class="fa-solid fa-star text-xs"></i>
                         </div>
                     </div>
-                    <p class="text-zinc-500 text-xs mt-2 italic">Submitted for event: <a href="{% url 'dashboard:event_detail' review.event.pk %}" class="text-yellow-600 hover:text-yellow-700 font-semibold">{{ review.event.title }}</a></p>
+                    <p class="text-zinc-500 text-xs mt-2 italic">
+                        Submitted for event:
+                        <a href="{% url 'dashboard:event_detail' review.event.pk %}" class="text-zinc-700 hover:text-black font-semibold">
+                            {{ review.event.title }}
+                        </a>
+                    </p>
                 </div>
                 {% endfor %}
             </div>

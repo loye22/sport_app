@@ -12,22 +12,24 @@
     <div class="relative flex-1 max-w-sm">
         <input type="text" name="q" value="{{ search_q }}"
                placeholder="Search name, email…"
-               class="w-full bg-white border border-zinc-200 focus:border-yellow-300 rounded-2xl py-2.5 pl-10 pr-4 text-sm focus:outline-none">
+               class="w-full bg-white border border-zinc-200 focus:border-zinc-400 rounded-2xl py-2.5 pl-10 pr-4 text-sm focus:outline-none">
         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-zinc-400 text-sm"></i>
     </div>
     <select name="gender"
-            class="bg-white border border-zinc-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-yellow-300">
+            class="bg-white border border-zinc-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-zinc-400">
         <option value="">All genders</option>
         <option value="Male"   {% if gender_f == 'Male' %}selected{% endif %}>Male</option>
         <option value="Female" {% if gender_f == 'Female' %}selected{% endif %}>Female</option>
     </select>
+    <!-- Filter button – changed from yellow to dark -->
     <button type="submit"
-            class="bg-yellow-400 hover:bg-yellow-500 text-white px-5 py-2.5 rounded-2xl text-sm font-medium transition-colors">
+            class="bg-zinc-800 hover:bg-black text-white px-5 py-2.5 rounded-2xl text-sm font-medium transition-colors">
         Filter
     </button>
     {% if search_q or gender_f %}
+    <!-- Clear link – hover to black -->
     <a href="{% url 'dashboard:users' %}"
-       class="text-sm text-zinc-400 hover:text-zinc-600 px-3">Clear</a>
+       class="text-sm text-zinc-400 hover:text-black transition-colors px-3">Clear</a>
     {% endif %}
 </form>
 
@@ -50,7 +52,8 @@
             <tr class="hover:bg-zinc-50 transition-colors">
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-yellow-100 rounded-xl flex items-center justify-center text-yellow-600 font-bold text-sm flex-shrink-0">
+                        <!-- Avatar – changed from yellow to dark -->
+                        <div class="w-9 h-9 bg-zinc-200 rounded-xl flex items-center justify-center text-zinc-700 font-bold text-sm flex-shrink-0">
                             {{ profile.full_name|first|upper }}
                         </div>
                         <div>
@@ -63,7 +66,8 @@
                 <td class="px-6 py-4 text-sm text-zinc-600">{{ profile.gender }}</td>
                 <td class="px-6 py-4 text-sm text-zinc-400">{{ profile.created_at|date:"M d, Y" }}</td>
                 <td class="px-6 py-4">
-                    <span class="text-amber-500 font-medium text-sm">
+                    <!-- Rating – changed from amber to zinc -->
+                    <span class="text-zinc-700 font-medium text-sm">
                         {{ profile.average_host_rating }} ★
                     </span>
                 </td>

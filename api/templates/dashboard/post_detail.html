@@ -2,8 +2,8 @@
 {% block title %}Post Details — {{ post.activity_name }}{% endblock %}
 
 {% block content %}
-<!-- Back link -->
-<a href="{% url 'dashboard:posts' %}" class="inline-flex items-center gap-2 text-zinc-500 hover:text-zinc-800 text-sm font-medium mb-6 transition-colors">
+<!-- Back link – hover changed to black for consistency -->
+<a href="{% url 'dashboard:posts' %}" class="inline-flex items-center gap-2 text-zinc-500 hover:text-black text-sm font-medium mb-6 transition-colors">
     <i class="fa-solid fa-arrow-left"></i> Back to Posts
 </a>
 
@@ -16,6 +16,7 @@
         <!-- Post Content Card -->
         <div class="bg-white rounded-3xl border border-zinc-100 overflow-hidden shadow-sm p-8">
             <div class="flex items-center gap-3 mb-6">
+                <!-- Category badge – already dark -->
                 <span class="px-3 py-1 bg-zinc-900 text-white text-xs font-semibold rounded-full uppercase tracking-wider">
                     {{ post.category.name|default:"General" }}
                 </span>
@@ -30,7 +31,7 @@
             </div>
             {% endif %}
 
-            <!-- Stats strip -->
+            <!-- Stats strip – uses semantic red for likes, neutral for others -->
             <div class="grid grid-cols-3 gap-4 border-t border-b border-zinc-50 py-4 my-6 text-center">
                 <div>
                     <span class="text-zinc-400 block text-xs uppercase tracking-wider mb-1">Likes</span>
@@ -46,7 +47,7 @@
                 </div>
             </div>
 
-            <!-- Extra stats (scores, possession, fouls, etc.) -->
+            <!-- Extra stats -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                 {% if post.scores %}
                 <div class="bg-zinc-50 p-4 rounded-2xl text-center">

@@ -6,7 +6,7 @@
     <h1 class="text-3xl font-semibold">Categories</h1>
     {% if perms_map.can_edit_categories %}
     <button onclick="document.getElementById('add-category-modal').classList.remove('hidden')"
-            class="bg-yellow-400 hover:bg-yellow-500 text-white px-5 py-2.5 rounded-2xl text-sm font-medium transition-colors flex items-center gap-2">
+            class="bg-zinc-800 hover:bg-black text-white px-5 py-2.5 rounded-2xl text-sm font-medium transition-colors flex items-center gap-2">
         <i class="fa-solid fa-plus"></i> Add Category
     </button>
     {% endif %}
@@ -18,7 +18,8 @@
         {% if cat.image %}
         <img src="{{ cat.image.url }}" class="w-14 h-14 object-cover rounded-2xl flex-shrink-0" alt="{{ cat.name }}">
         {% else %}
-        <div class="w-14 h-14 bg-yellow-50 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">
+        <!-- Placeholder – changed from yellow to gray -->
+        <div class="w-14 h-14 bg-zinc-100 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">
             🏅
         </div>
         {% endif %}
@@ -49,16 +50,13 @@
     {% endfor %}
 </div>
 
-<!-- Modal for adding category -->
+<!-- Modal for adding category – updated to dark theme -->
 <div id="add-category-modal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <!-- Background backdrop -->
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm transition-opacity" onclick="document.getElementById('add-category-modal').classList.add('hidden')"></div>
 
-        <!-- This element is to trick the browser into centering the modal contents. -->
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-        <!-- Modal panel -->
         <div class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-zinc-100 p-8">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-semibold text-zinc-800" id="modal-title">Add New Category</h3>
@@ -72,13 +70,15 @@
                 
                 <div>
                     <label for="category-name" class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">Category Name</label>
+                    <!-- Input focus border changed from yellow to zinc -->
                     <input type="text" id="category-name" name="name" required placeholder="e.g. Football, Basketball..."
-                           class="w-full bg-white border border-zinc-200 focus:border-yellow-300 rounded-2xl py-3 px-4 text-sm focus:outline-none transition-colors">
+                           class="w-full bg-white border border-zinc-200 focus:border-zinc-400 rounded-2xl py-3 px-4 text-sm focus:outline-none transition-colors">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">Category Image (Optional)</label>
-                    <div class="border border-dashed border-zinc-200 hover:border-yellow-400 rounded-2xl p-6 text-center transition-colors relative cursor-pointer" onclick="document.getElementById('category-image').click()">
+                    <!-- Drag-drop border hover changed from yellow to zinc -->
+                    <div class="border border-dashed border-zinc-200 hover:border-zinc-400 rounded-2xl p-6 text-center transition-colors relative cursor-pointer" onclick="document.getElementById('category-image').click()">
                         <input type="file" id="category-image" name="image" accept="image/*" class="hidden" onchange="updateFileName(this)">
                         <div class="space-y-2" id="upload-placeholder">
                             <i class="fa-solid fa-cloud-arrow-up text-zinc-400 text-2xl block"></i>
@@ -93,8 +93,9 @@
                             class="flex-1 py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-semibold rounded-2xl text-sm transition-colors text-center">
                         Cancel
                     </button>
+                    <!-- Submit button – changed to dark -->
                     <button type="submit"
-                            class="flex-1 py-3 bg-yellow-400 hover:bg-yellow-500 text-white font-semibold rounded-2xl text-sm transition-colors text-center">
+                            class="flex-1 py-3 bg-zinc-800 hover:bg-black text-white font-semibold rounded-2xl text-sm transition-colors text-center">
                         Add Category
                     </button>
                 </div>
@@ -108,10 +109,12 @@ function updateFileName(input) {
     const textSpan = document.getElementById('file-name-text');
     if (input.files && input.files.length > 0) {
         textSpan.textContent = input.files[0].name;
-        textSpan.classList.add('text-yellow-600', 'font-medium');
+        textSpan.classList.add('text-zinc-700', 'font-medium');
+        textSpan.classList.remove('text-zinc-500');
     } else {
         textSpan.textContent = 'Click to upload image or drag and drop';
-        textSpan.classList.remove('text-yellow-600', 'font-medium');
+        textSpan.classList.remove('text-zinc-700', 'font-medium');
+        textSpan.classList.add('text-zinc-500');
     }
 }
 </script>

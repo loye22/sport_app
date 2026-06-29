@@ -3,7 +3,8 @@
     {% if event.image %}
     <img src="{{ event.image }}" class="w-full h-36 object-cover" alt="{{ event.title }}">
     {% else %}
-    <div class="w-full h-16 bg-gradient-to-r from-yellow-100 to-yellow-50"></div>
+    <!-- changed from yellow to zinc -->
+    <div class="w-full h-16 bg-gradient-to-r from-zinc-200 to-zinc-100"></div>
     {% endif %}
 
     <div class="p-6">
@@ -41,7 +42,7 @@
 
             {% if event.status == 'Available' %}
             <button onclick="document.getElementById('cancel-form-{{ event.pk }}').classList.toggle('hidden')"
-                    class="flex-1 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl text-xs font-medium transition-colors">
+                    class="flex-1 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl text-xs font-medium transition-colors">
                 Cancel
             </button>
             {% endif %}
@@ -57,16 +58,16 @@
                   method="post" class="hidden">{% csrf_token %}</form>
         </div>
 
-        <!-- Inline cancel form -->
+        <!-- Inline cancel form – now using black/dark theme -->
         <form id="cancel-form-{{ event.pk }}"
               action="{% url 'dashboard:event_cancel' event.pk %}"
               method="post"
               class="hidden mt-3">
             {% csrf_token %}
             <input type="text" name="reason" placeholder="Cancellation reason…"
-                   class="w-full border border-zinc-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-yellow-300 mb-2">
+                   class="w-full border border-zinc-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-zinc-500 mb-2">
             <button type="submit"
-                    class="w-full py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-xl text-xs font-medium transition-colors">
+                    class="w-full py-2 bg-zinc-800 hover:bg-black text-white rounded-xl text-xs font-medium transition-colors">
                 Confirm Cancel
             </button>
         </form>

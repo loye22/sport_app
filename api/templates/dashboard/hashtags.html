@@ -5,8 +5,9 @@
 <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-semibold">Hashtags</h1>
     {% if perms_map.can_edit_hashtags %}
+    <!-- "New Hashtag" button – changed from yellow to dark -->
     <button onclick="document.getElementById('new-tag-modal').classList.toggle('hidden')"
-            class="bg-yellow-400 hover:bg-yellow-500 text-white px-5 py-2.5 rounded-2xl text-sm font-medium transition-colors flex items-center gap-2">
+            class="bg-zinc-800 hover:bg-black text-white px-5 py-2.5 rounded-2xl text-sm font-medium transition-colors flex items-center gap-2">
         <i class="fa-solid fa-plus"></i> New Hashtag
     </button>
     {% endif %}
@@ -17,11 +18,14 @@
 <div id="new-tag-modal" class="hidden bg-white rounded-3xl border border-zinc-100 p-6 mb-6">
     <form action="{% url 'dashboard:hashtag_create' %}" method="post" class="flex items-center gap-3">
         {% csrf_token %}
+        <!-- Hash symbol now neutral -->
         <span class="text-zinc-400 text-lg">#</span>
+        <!-- Input focus border changed -->
         <input type="text" name="name" placeholder="hashtag name" autofocus
-               class="flex-1 border border-zinc-200 focus:border-yellow-300 rounded-2xl px-4 py-2.5 text-sm focus:outline-none">
+               class="flex-1 border border-zinc-200 focus:border-zinc-400 rounded-2xl px-4 py-2.5 text-sm focus:outline-none">
+        <!-- Create button – changed to dark -->
         <button type="submit"
-                class="bg-yellow-400 hover:bg-yellow-500 text-white px-5 py-2.5 rounded-2xl text-sm font-medium transition-colors">
+                class="bg-zinc-800 hover:bg-black text-white px-5 py-2.5 rounded-2xl text-sm font-medium transition-colors">
             Create
         </button>
         <button type="button" onclick="document.getElementById('new-tag-modal').classList.add('hidden')"
@@ -36,8 +40,10 @@
     {% if hashtags %}
     <div class="flex flex-wrap gap-3">
         {% for tag in hashtags %}
-        <div class="group flex items-center gap-2 bg-zinc-50 hover:bg-yellow-50 border border-zinc-200 hover:border-yellow-300 rounded-2xl px-4 py-2.5 transition-colors">
-            <span class="text-yellow-500 font-semibold text-sm">#</span>
+        <!-- Tag item: hover and border updated -->
+        <div class="group flex items-center gap-2 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 hover:border-zinc-400 rounded-2xl px-4 py-2.5 transition-colors">
+            <!-- Hash symbol – changed from yellow to neutral -->
+            <span class="text-zinc-600 font-semibold text-sm">#</span>
             <span class="font-medium text-sm">{{ tag.name }}</span>
             <span class="text-xs text-zinc-400 bg-white border border-zinc-100 rounded-xl px-2 py-0.5">
                 {{ tag.post_count|default:0 }}p

@@ -1,7 +1,8 @@
 <tr class="hover:bg-zinc-50 transition-colors">
     <td class="px-6 py-4">
         <div class="flex items-center gap-3">
-            <div class="w-9 h-9 bg-yellow-100 rounded-xl flex items-center justify-center text-yellow-600 font-bold text-sm flex-shrink-0">
+            <!-- User avatar – changed from yellow to dark gray -->
+            <div class="w-9 h-9 bg-zinc-200 rounded-xl flex items-center justify-center text-zinc-700 font-bold text-sm flex-shrink-0">
                 {{ profile.full_name|first|upper }}
             </div>
             <div>
@@ -14,7 +15,8 @@
     <td class="px-6 py-4 text-sm text-zinc-600">{{ profile.gender }}</td>
     <td class="px-6 py-4 text-sm text-zinc-400">{{ profile.created_at|date:"M d, Y" }}</td>
     <td class="px-6 py-4">
-        <span class="text-amber-500 font-medium text-sm">
+        <!-- Rating – changed from amber to zinc/black -->
+        <span class="text-zinc-700 font-medium text-sm">
             {{ profile.average_host_rating }} ★
         </span>
     </td>
