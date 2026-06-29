@@ -132,6 +132,14 @@ def get_perms_map(role: str | None) -> dict[str, bool]:
     return {k: (k in granted) for k in all_keys}
 
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# HOME
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # DECORATORS
 # ─────────────────────────────────────────────────────────────────────────────
@@ -152,6 +160,71 @@ def staff_required(view_func):
         return view_func(request, *args, **kwargs)
 
     return wrapper
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# overview
+# ─────────────────────────────────────────────────────────────────────────────
+
+@staff_required
+def overview_detailed(request):
+    ctx = base_context(request, "overview")
+
+    # Core stats (reuse your existing ones)
+    total_users = UserProfile.objects.count()
+    active_events = Event.objects.filter(status="Available").count()
+    total_posts = Post.objects.count()
+    avg_rating = Review.objects.aggregate(avg=Avg("rating"))["avg"] or 0
+
+    # Extra stats
+    total_venues = Venue.objects.count()
+    total_categories = Category.objects.count()
+    total_hashtags = Hashtag.objects.count()
+    total_comments = Comment.objects.count()
+    total_reposts = Repost.objects.count()
+    pending_reports = Post.objects.filter(is_reported=True).count() + Repost.objects.filter(is_reported=True).count()
+    pending_delete = DeleteRequest.objects.filter(status="pending").count()
+
+    # Weekly / daily activity
+    users_this_week = UserProfile.objects.filter(
+        created_at__gte=timezone.now() - timezone.timedelta(days=7)
+    ).count()
+    events_today = Event.objects.filter(date=timezone.now().date()).count()
+
+    # Event status distribution (for stacked bar)
+    event_status_counts = Event.objects.values('status').annotate(count=Count('status'))
+    status_dict = {item['status']: item['count'] for item in event_status_counts}
+    total_events = Event.objects.count()
+
+    # Profile picture completion (example – adjust if your field name differs)
+    users_with_pic = UserProfile.objects.exclude(profile_picture__isnull=True).exclude(profile_picture__exact='').count()
+    profile_pic_percent = round((users_with_pic / total_users * 100) if total_users else 0)
+
+    # Average rating as a percentage (for the circular gauge)
+    avg_rating_percent = round((avg_rating / 5) * 100) if avg_rating else 0
+
+    ctx.update({
+        "total_users": total_users,
+        "active_events": active_events,
+        "total_posts": total_posts,
+        "avg_rating": avg_rating,
+        "total_venues": total_venues,
+        "total_categories": total_categories,
+        "total_hashtags": total_hashtags,
+        "total_comments": total_comments,
+        "total_reposts": total_reposts,
+        "pending_reports": pending_reports,
+        "pending_delete": pending_delete,
+        "users_this_week": users_this_week,
+        "events_today": events_today,
+        "status_dict": status_dict,
+        "total_events": total_events,
+        "profile_pic_percent": profile_pic_percent,
+        "avg_rating_percent": avg_rating_percent,
+        "recent_events": Event.objects.select_related("host", "category").order_by("-created_at")[:6],
+    })
+    return render(request, "dashboard/overview_detailed.html", ctx)
+
 
 
 def permission_required_dashboard(perm_key: str):

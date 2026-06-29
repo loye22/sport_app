@@ -1,132 +1,211 @@
 {% extends "dashboard/base.html" %}
 {% load static %}
 
-{% block title %}Overview{% endblock %}
+{% block title %}Overview &amp; Statistics{% endblock %}
 
 {% block content %}
 <!-- Header -->
 <div class="flex justify-between items-end mb-8">
     <div>
         <h1 class="text-4xl font-semibold tracking-tighter">Dashboard Overview</h1>
-        <p class="text-zinc-500 mt-1">Real‑time insights from your Squad link platform</p>
+        <p class="text-zinc-500 mt-1">Key metrics at a glance</p>
     </div>
-    <div class="bg-white px-5 py-3 rounded-3xl border border-zinc-200 flex items-center gap-x-2 text-sm font-medium">
-        <i class="fa-solid fa-calendar text-zinc-700"></i>  <!-- changed from yellow -->
+    <div class="bg-white px-5 py-3 rounded-3xl border border-zinc-200 text-sm font-medium">
         <span id="current-date"></span>
     </div>
 </div>
 
-<!-- Stat Cards -->
-<div class="grid grid-cols-4 gap-6">
+<!-- Stat Cards – 12 cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+
+    <!-- 1. Total Users -->
     <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100">
-        <div class="flex justify-between items-start">
-            <div>
-                <div class="text-sm text-zinc-500">Total Users</div>
-                <div class="stat-number text-5xl font-semibold mt-3">{{ total_users|default:"0" }}</div>
+        <div class="text-sm text-zinc-500 mb-1">Total Users</div>
+        <div class="stat-number text-4xl font-semibold text-zinc-800">{{ total_users|default:"0" }}</div>
+        <div class="mt-4 flex items-center gap-3">
+            <div class="flex-1 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+                <div class="h-full bg-emerald-500 rounded-full" style="width: {{ users_this_week|default:0 }}%"></div>
             </div>
-            <div class="text-4xl">👥</div>
-        </div>
-        <div class="mt-6 text-emerald-600 flex items-center gap-1 text-sm">
-            <i class="fa-solid fa-arrow-trend-up"></i>
-            +{{ users_this_week }} this week
+            <span class="text-xs text-emerald-600 font-medium">+{{ users_this_week }} this week</span>
         </div>
     </div>
 
+    <!-- 2. Active Events -->
     <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100">
-        <div class="flex justify-between items-start">
-            <div>
-                <div class="text-sm text-zinc-500">Active Events</div>
-                <div class="stat-number text-5xl font-semibold mt-3">{{ active_events|default:"0" }}</div>
+        <div class="text-sm text-zinc-500 mb-1">Active Events</div>
+        <div class="stat-number text-4xl font-semibold text-zinc-800">{{ active_events|default:"0" }}</div>
+        <div class="mt-4 flex items-center gap-3">
+            <div class="flex-1 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+                <div class="h-full bg-blue-500 rounded-full" style="width: {{ events_today|default:0 }}%"></div>
             </div>
-            <div class="text-4xl">🏟️</div>
-        </div>
-        <div class="mt-6 text-emerald-600 flex items-center gap-1 text-sm">
-            <i class="fa-solid fa-arrow-trend-up"></i>
-            {{ events_today }} today
+            <span class="text-xs text-blue-600 font-medium">{{ events_today }} today</span>
         </div>
     </div>
 
+    <!-- 3. Total Posts -->
     <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100">
-        <div class="flex justify-between items-start">
-            <div>
-                <div class="text-sm text-zinc-500">Posts</div>
-                <div class="stat-number text-5xl font-semibold mt-3">{{ total_posts|default:"0" }}</div>
+        <div class="text-sm text-zinc-500 mb-1">Total Posts</div>
+        <div class="stat-number text-4xl font-semibold text-zinc-800">{{ total_posts|default:"0" }}</div>
+        <div class="mt-4 text-xs text-zinc-400">All time</div>
+    </div>
+
+    <!-- 4. Average Host Rating – Circular -->
+    <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100 relative">
+        <div class="text-sm text-zinc-500 mb-1">Avg Host Rating</div>
+        <div class="flex items-center gap-4">
+            <div class="relative w-16 h-16">
+                <svg class="w-16 h-16 -rotate-90 transform" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15.915" fill="none" stroke="#e5e7eb" stroke-width="3" />
+                    <circle cx="18" cy="18" r="15.915" fill="none" stroke="#3b82f6" stroke-width="3"
+                        stroke-dasharray="100" stroke-dashoffset="{{ avg_rating_percent|default:100 }}"
+                        stroke-linecap="round" />
+                </svg>
+                <span class="absolute inset-0 flex items-center justify-center text-sm font-bold text-zinc-800">
+                    {{ avg_rating|floatformat:1|default:"—" }}
+                </span>
             </div>
-            <div class="text-4xl">📸</div>
-        </div>
-        <div class="mt-6 text-zinc-600 flex items-center gap-1 text-sm">  <!-- changed from amber -->
-            <i class="fa-solid fa-arrow-trend-up"></i> Trending
+            <div>
+                <div class="text-xs text-zinc-400">out of 5</div>
+                <div class="text-xs text-emerald-600 font-medium">Excellent</div>
+            </div>
         </div>
     </div>
 
+    <!-- 5. Total Venues -->
     <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100">
-        <div class="flex justify-between items-start">
-            <div>
-                <div class="text-sm text-zinc-500">Avg Host Rating</div>
-                <div class="stat-number text-5xl font-semibold mt-3">{{ avg_rating|floatformat:2|default:"—" }}</div>
-            </div>
-            <div class="text-4xl">⭐</div>
+        <div class="text-sm text-zinc-500 mb-1">Total Venues</div>
+        <div class="stat-number text-4xl font-semibold text-zinc-800">{{ total_venues|default:"0" }}</div>
+        <div class="mt-4 text-xs text-zinc-400">Registered sports venues</div>
+    </div>
+
+    <!-- 6. Total Categories -->
+    <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100">
+        <div class="text-sm text-zinc-500 mb-1">Categories</div>
+        <div class="stat-number text-4xl font-semibold text-zinc-800">{{ total_categories|default:"0" }}</div>
+        <div class="mt-4 text-xs text-zinc-400">Available categories</div>
+    </div>
+
+    <!-- 7. Total Hashtags -->
+    <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100">
+        <div class="text-sm text-zinc-500 mb-1">Hashtags</div>
+        <div class="stat-number text-4xl font-semibold text-zinc-800">{{ total_hashtags|default:"0" }}</div>
+        <div class="mt-4 text-xs text-zinc-400">Unique hashtags</div>
+    </div>
+
+    <!-- 8. Total Comments -->
+    <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100">
+        <div class="text-sm text-zinc-500 mb-1">Comments</div>
+        <div class="stat-number text-4xl font-semibold text-zinc-800">{{ total_comments|default:"0" }}</div>
+        <div class="mt-4 text-xs text-zinc-400">On posts</div>
+    </div>
+
+    <!-- 9. Total Reposts -->
+    <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100">
+        <div class="text-sm text-zinc-500 mb-1">Reposts</div>
+        <div class="stat-number text-4xl font-semibold text-zinc-800">{{ total_reposts|default:"0" }}</div>
+        <div class="mt-4 text-xs text-zinc-400">All reposts</div>
+    </div>
+
+    <!-- 10. Pending Reports -->
+    <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100">
+        <div class="text-sm text-zinc-500 mb-1">Pending Reports</div>
+        <div class="stat-number text-4xl font-semibold {% if pending_reports > 0 %}text-red-500{% else %}text-zinc-400{% endif %}">
+            {{ pending_reports|default:"0" }}
         </div>
-        <div class="mt-6 text-emerald-600 flex items-center gap-1 text-sm">
-            Excellent feedback
+        <div class="mt-4 text-xs text-zinc-400">
+            {% if pending_reports > 0 %}
+            <span class="text-red-500">Requires attention</span>
+            {% else %}
+            All clear
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 11. Pending Delete Requests -->
+    <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100">
+        <div class="text-sm text-zinc-500 mb-1">Delete Requests</div>
+        <div class="stat-number text-4xl font-semibold {% if pending_delete > 0 %}text-amber-500{% else %}text-zinc-400{% endif %}">
+            {{ pending_delete|default:"0" }}
+        </div>
+        <div class="mt-4 text-xs text-zinc-400">
+            {% if pending_delete > 0 %}
+            <span class="text-amber-500">Pending approval</span>
+            {% else %}
+            None pending
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 12. Profile Picture Completion – Circular -->
+    <div class="bg-white rounded-3xl p-6 card-hover border border-zinc-100">
+        <div class="text-sm text-zinc-500 mb-1">Profile Pictures</div>
+        <div class="flex items-center gap-4">
+            <div class="relative w-16 h-16">
+                <svg class="w-16 h-16 -rotate-90 transform" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15.915" fill="none" stroke="#e5e7eb" stroke-width="3" />
+                    <circle cx="18" cy="18" r="15.915" fill="none" stroke="#8b5cf6" stroke-width="3"
+                        stroke-dasharray="100" stroke-dashoffset="{{ profile_pic_percent|default:100 }}"
+                        stroke-linecap="round" />
+                </svg>
+                <span class="absolute inset-0 flex items-center justify-center text-sm font-bold text-zinc-800">
+                    {{ profile_pic_percent|default:0 }}%
+                </span>
+            </div>
+            <div>
+                <div class="text-xs text-zinc-400">Users with photo</div>
+                <div class="text-xs text-zinc-500">{{ users_with_pic|default:0 }} / {{ total_users }}</div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Pending Alerts -->
-{% if pending_reports_count or pending_delete_count %}
-<div class="mt-8 grid grid-cols-2 gap-6">
-    {% if pending_reports_count %}
-    <a href="{% url 'dashboard:reports' %}"
-       class="flex items-center gap-4 bg-red-50 border border-red-100 rounded-3xl p-5 hover:bg-red-100 transition-colors">
-        <div class="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center">
-            <i class="fa-solid fa-flag text-red-500 text-lg"></i>
+<!-- Event Status Distribution – stacked bar -->
+<div class="mb-8">
+    <h3 class="text-lg font-semibold text-zinc-800 mb-4">Event Status Distribution</h3>
+    <div class="bg-white rounded-3xl p-6 border border-zinc-100">
+        <div class="flex flex-wrap items-center gap-4 mb-3">
+            <span class="text-sm text-zinc-500">Total events: {{ total_events }}</span>
+            <span class="text-sm text-zinc-500">
+                Available: {{ status_dict.Available|default:0 }} |
+                Pending: {{ status_dict.Pending|default:0 }} |
+                Cancelled: {{ status_dict.Cancelled|default:0 }} |
+                Completed: {{ status_dict.Completed|default:0 }}
+            </span>
         </div>
-        <div>
-            <div class="font-semibold text-red-700">{{ pending_reports_count }} Pending Reports</div>
-            <div class="text-xs text-red-400">Click to review flagged content</div>
+        <div class="w-full h-3 bg-zinc-100 rounded-full overflow-hidden flex">
+            <div class="h-full bg-emerald-500" style="width: {% widthratio status_dict.Available|default:0 total_events 100 %}%"></div>
+            <div class="h-full bg-yellow-500" style="width: {% widthratio status_dict.Pending|default:0 total_events 100 %}%"></div>
+            <div class="h-full bg-red-500" style="width: {% widthratio status_dict.Cancelled|default:0 total_events 100 %}%"></div>
+            <div class="h-full bg-blue-400" style="width: {% widthratio status_dict.Completed|default:0 total_events 100 %}%"></div>
         </div>
-        <i class="fa-solid fa-arrow-right ml-auto text-red-400"></i>
-    </a>
-    {% endif %}
-
-    {% if pending_delete_count %}
-    <a href="{% url 'dashboard:delete_requests' %}"
-       class="flex items-center gap-4 bg-amber-50 border border-amber-100 rounded-3xl p-5 hover:bg-amber-100 transition-colors">
-        <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center">
-            <i class="fa-solid fa-user-minus text-amber-500 text-lg"></i>
+        <div class="flex flex-wrap gap-4 mt-3 text-xs text-zinc-500">
+            <span><span class="inline-block w-3 h-3 bg-emerald-500 rounded-full mr-1"></span> Available</span>
+            <span><span class="inline-block w-3 h-3 bg-yellow-500 rounded-full mr-1"></span> Pending</span>
+            <span><span class="inline-block w-3 h-3 bg-red-500 rounded-full mr-1"></span> Cancelled</span>
+            <span><span class="inline-block w-3 h-3 bg-blue-400 rounded-full mr-1"></span> Completed</span>
         </div>
-        <div>
-            <div class="font-semibold text-amber-700">{{ pending_delete_count }} Delete Requests</div>
-            <div class="text-xs text-amber-400">Click to process account deletion requests</div>
-        </div>
-        <i class="fa-solid fa-arrow-right ml-auto text-amber-400"></i>
-    </a>
-    {% endif %}
+    </div>
 </div>
-{% endif %}
 
 <!-- Recent Events -->
-<div class="mt-10">
+<div class="mt-4">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-xl font-semibold">Recent Events</h2>
         {% if perms_map.can_view_events %}
         <a href="{% url 'dashboard:events' %}" class="text-sm text-zinc-700 hover:text-black font-medium transition-colors">
-            View all <i class="fa-solid fa-arrow-right ml-1"></i>
+            View all →
         </a>
         {% endif %}
     </div>
 
     {% if recent_events %}
-    <div class="grid grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for event in recent_events %}
         <div class="bg-white rounded-3xl overflow-hidden card-hover border border-zinc-100">
             {% if event.image %}
             <img src="{{ event.image }}" class="w-full h-44 object-cover" alt="{{ event.title }}">
             {% else %}
-            <div class="w-full h-44 bg-gradient-to-br from-zinc-200 to-zinc-300 flex items-center justify-center text-5xl">  <!-- changed from yellow -->
-                🏟️
-            </div>
+            <div class="w-full h-44 bg-gradient-to-br from-zinc-200 to-zinc-300 flex items-center justify-center text-5xl">🏟️</div>
             {% endif %}
             <div class="p-6">
                 <div class="font-semibold truncate">{{ event.title }}</div>
@@ -147,7 +226,6 @@
     </div>
     {% else %}
     <div class="bg-white rounded-3xl p-12 text-center border border-zinc-100">
-        <div class="text-5xl mb-4">🏟️</div>
         <p class="text-zinc-400">No events yet</p>
     </div>
     {% endif %}
