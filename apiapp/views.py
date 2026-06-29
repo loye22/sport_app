@@ -614,6 +614,7 @@ def delete_requests(request):
     return render(request, "dashboard/delete_requests.html", ctx)
 
 
+
 @staff_required
 @permission_required_dashboard("can_approve_delete_requests")
 @require_POST
@@ -627,10 +628,9 @@ def process_delete_request(request, pk):
         dr.processed_at = timezone.now()
         dr.admin_notes = admin_note
         dr.save()
-        # Delete the actual user account
-        user = dr.user_profile.user
-        user.delete()
-        messages.success(request, f"Delete request approved — account for '{dr.user_profile.full_name}' removed.")
+        # Removal of the actual user account is now omitted.
+        # The delete request is simply marked as approved.
+        messages.success(request, f"Delete request for '{dr.user_profile.full_name}' approved (user account was not deleted).")
     elif action == "reject":
         dr.status = "rejected"
         dr.processed_at = timezone.now()
@@ -641,6 +641,34 @@ def process_delete_request(request, pk):
         messages.error(request, "Invalid action.")
 
     return redirect("dashboard:delete_requests")
+
+# @staff_required
+# @permission_required_dashboard("can_approve_delete_requests")
+# @require_POST
+# def process_delete_request(request, pk):
+#     dr = get_object_or_404(DeleteRequest, pk=pk)
+#     action = request.POST.get("action")  # "approve" or "reject"
+#     admin_note = request.POST.get("admin_notes", "")
+
+#     if action == "approve":
+#         dr.status = "approved"
+#         dr.processed_at = timezone.now()
+#         dr.admin_notes = admin_note
+#         dr.save()
+#         # Delete the actual user account
+#         user = dr.user_profile.user
+#         user.delete()
+#         messages.success(request, f"Delete request approved — account for '{dr.user_profile.full_name}' removed.")
+#     elif action == "reject":
+#         dr.status = "rejected"
+#         dr.processed_at = timezone.now()
+#         dr.admin_notes = admin_note
+#         dr.save()
+#         messages.success(request, f"Delete request for '{dr.user_profile.full_name}' rejected.")
+#     else:
+#         messages.error(request, "Invalid action.")
+
+#     return redirect("dashboard:delete_requests")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
