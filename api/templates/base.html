@@ -1,12 +1,12 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SportSphere • {% block title %}Dashboard{% endblock %}</title>
+    <title>Squad link • {% block title %}Dashboard{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <!-- HTMX for fast partial-page updates -->
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -18,8 +18,8 @@
         }
         .sidebar-link:hover { transform: translateX(6px); }
         .sidebar-link.active {
-            background-color: #fefce8;
-            color: #854d0e;
+            background-color: #1a1a1a;      /* black instead of yellow */
+            color: #ffffff;
             font-weight: 600;
         }
 
@@ -33,13 +33,13 @@
 
         .stat-number { font-variant-numeric: tabular-nums; }
 
-        /* HTMX loading indicator */
+        /* HTMX loading indicator – black gradient */
         #page-loader {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0;
             height: 3px;
-            background: linear-gradient(90deg, #facc15, #f59e0b);
+            background: linear-gradient(90deg, #222, #000);
             z-index: 9999;
             animation: loading 1s ease infinite;
         }
@@ -50,7 +50,6 @@
         }
         .htmx-request #page-loader { display: block; }
 
-        /* Toast messages */
         .toast {
             animation: toastIn 0.3s ease forwards;
         }
@@ -59,11 +58,10 @@
             to   { opacity: 1; transform: translateX(0); }
         }
 
-        /* Confirm modal */
         #confirm-modal { display: none; }
         #confirm-modal.open { display: flex; }
 
-        /* Status badges */
+        /* Status badges – unchanged */
         .badge-available  { @apply bg-emerald-100 text-emerald-700; }
         .badge-pending    { @apply bg-yellow-100 text-yellow-700; }
         .badge-cancelled  { @apply bg-red-100 text-red-700; }
@@ -102,14 +100,15 @@
 <div class="flex h-screen overflow-hidden">
 
     <!-- ─── SIDEBAR ─────────────────────────────────────────── -->
-    <aside class="w-72 bg-white border-r border-zinc-200 flex flex-col flex-shrink-0">
-
-        <!-- Brand -->
+    <aside class="w-72 bg-white border-r border-zinc-200 flex flex-col flex-shrink-0 rounded-[15px]">
+        <!-- Brand – changed to Squad link + logo -->
         <div class="p-6 border-b border-zinc-100">
             <div class="flex items-center gap-x-3">
-                <div class="w-9 h-9 bg-yellow-400 rounded-2xl flex items-center justify-center text-2xl shadow-inner">⚽</div>
+                <!-- Logo image instead of emoji -->
+                <img src="{% static 'images/logo.png' %}" alt="Squad link logo" class="w-9 h-9 object-contain rounded-[15px]">
+                <!-- <img src="{% static 'images/logo.png' %}" alt="Squad link logo" class="w-9 h-9 object-contain"> -->
                 <div>
-                    <span class="font-semibold tracking-tight text-xl">SportSphere</span>
+                    <span class="font-semibold tracking-tight text-xl">Squad link</span>
                     <div class="text-[10px] text-zinc-400 font-medium tracking-widest uppercase">Admin</div>
                 </div>
             </div>
@@ -213,10 +212,10 @@
             {% endwith %}
         </nav>
 
-        <!-- Admin user card -->
+        <!-- Admin user card – changed yellow to black/dark -->
         <div class="border-t border-zinc-100 p-4">
             <div class="flex items-center gap-x-3 px-3 py-2.5 rounded-2xl hover:bg-zinc-50 transition-colors">
-                <div class="w-9 h-9 bg-yellow-100 rounded-xl flex items-center justify-center text-yellow-600 font-bold text-sm flex-shrink-0">
+                <div class="w-9 h-9 bg-zinc-800 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                     {{ request.user.username|first|upper }}
                 </div>
                 <div class="flex-1 min-w-0">
@@ -233,15 +232,14 @@
     </aside>
 
     <!-- ─── MAIN AREA ─────────────────────────────────────── -->
-    <div class="flex-1 flex flex-col overflow-hidden">
+    <div class="flex-1 flex flex-col overflow-hidden rounded-[15px]">
 
-        <!-- Top Nav -->
+        <!-- Top Nav – changed the role badge and user icon to black/dark -->
         <nav class="bg-white border-b border-zinc-100 px-8 py-4 flex items-center justify-between flex-shrink-0">
             <div class="flex items-center gap-x-6">
-                <!-- Search (cosmetic, wire up per-section if needed) -->
                 <div class="relative">
                     <input type="text" id="searchInput"
-                           class="bg-zinc-100 border border-transparent focus:border-yellow-300 w-72 pl-11 py-2.5 rounded-2xl text-sm focus:outline-none transition-all"
+                           class="bg-zinc-100 border border-transparent focus:border-zinc-400 w-72 pl-11 py-2.5 rounded-2xl text-sm focus:outline-none transition-all"
                            placeholder="Search...">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-3 text-zinc-400 text-sm"></i>
                 </div>
@@ -261,8 +259,8 @@
                     </button>
                 </div>
 
-                <!-- Role badge -->
-                <span class="px-3 py-1 bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs font-semibold rounded-full">
+                <!-- Role badge – black/dark theme -->
+                <span class="px-3 py-1 bg-zinc-100 border border-zinc-300 text-zinc-700 text-xs font-semibold rounded-full">
                     {{ dashboard_role }}
                 </span>
 
@@ -272,7 +270,7 @@
                         <div class="text-sm font-semibold leading-tight">{{ request.user.get_full_name|default:request.user.username }}</div>
                         <div class="text-xs text-emerald-600">Online</div>
                     </div>
-                    <div class="w-9 h-9 bg-yellow-400 rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                    <div class="w-9 h-9 bg-zinc-800 rounded-xl flex items-center justify-center text-white font-bold text-sm">
                         {{ request.user.username|first|upper }}
                     </div>
                 </div>
@@ -286,7 +284,7 @@
             </div>
         </nav>
 
-        <!-- Django messages banner -->
+        <!-- Django messages banner – unchanged -->
         {% if messages %}
         <div class="px-8 pt-4 space-y-2">
             {% for message in messages %}
@@ -333,7 +331,6 @@
         closeConfirm();
     });
 
-    // Close on backdrop click
     document.getElementById('confirm-modal').addEventListener('click', function(e) {
         if (e.target === this) closeConfirm();
     });

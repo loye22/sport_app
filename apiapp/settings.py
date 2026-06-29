@@ -139,8 +139,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = '/srv/static/static/'
+
+# Tell Django where to find additional static files
+STATICFILES_DIRS = [
+    BASE_DIR / 'apiapp' / 'static',   # points to apiapp/static/
+]
 
 
 # Default primary key field type

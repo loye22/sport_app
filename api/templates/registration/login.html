@@ -1,167 +1,101 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SportSphere • Admin Login</title>
+    <title>Squad link • Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', system-ui, sans-serif; }
-
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #f8fafc;
+        }
         .login-card {
-            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
         }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(24px); }
-            to   { opacity: 1; transform: translateY(0); }
+        .input-group {
+            transition: border-color 0.2s;
         }
-
-        input:focus { outline: none; }
-
-        .btn-login {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        .input-group:focus-within {
+            border-color: #000;
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
         }
-        .btn-login:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 20px -5px rgba(234,179,8,0.4);
+        .btn-primary {
+            background: #1a1a1a;
+            transition: background 0.2s;
         }
-        .btn-login:active { transform: translateY(0); }
-
-        /* Decorative blobs */
-        .blob {
-            position: absolute;
-            border-radius: 9999px;
-            filter: blur(80px);
-            opacity: 0.15;
-            pointer-events: none;
+        .btn-primary:hover {
+            background: #000;
         }
     </style>
 </head>
-<body class="bg-zinc-50 text-zinc-800 min-h-screen flex items-center justify-center relative overflow-hidden">
-
-    <!-- Decorative background blobs -->
-    <div class="blob w-96 h-96 bg-yellow-400 -top-24 -left-24"></div>
-    <div class="blob w-72 h-72 bg-yellow-300 bottom-0 right-0"></div>
-
-    <div class="login-card w-full max-w-md z-10">
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
         <!-- Card -->
-        <div class="bg-white rounded-3xl shadow-xl border border-zinc-100 p-10">
+        <div class="login-card rounded-3xl shadow-2xl p-8 border border-zinc-200">
 
-            <!-- Logo -->
-            <div class="flex items-center gap-x-3 mb-10">
-                <div class="w-10 h-10 bg-yellow-400 rounded-2xl flex items-center justify-center text-2xl shadow-inner">⚽</div>
-                <div>
-                    <span class="font-semibold tracking-tight text-2xl">SportSphere</span>
-                    <div class="text-xs text-zinc-400 -mt-0.5">Admin Portal</div>
-                </div>
+            <!-- Logo & brand -->
+            <div class="text-center mb-8">
+                <img src="{% static 'images/logo.png' %}" alt="Squad link logo" class="h-14 mx-auto mb-3 rounded-[15px]">
+                <!-- <img src="{% static 'images/logo.png' %}" alt="Squad link logo" class="h-14 mx-auto mb-3"> -->
+                <h1 class="text-2xl font-bold tracking-tight">Squad link</h1>
+                <p class="text-sm text-zinc-500 mt-1">Sign in to your admin panel</p>
             </div>
 
-            <h1 class="text-2xl font-semibold mb-1">Welcome back</h1>
-            <p class="text-zinc-400 text-sm mb-8">Sign in to your admin account</p>
-
-            <!-- Django Messages -->
-            {% if messages %}
-                {% for message in messages %}
-                <div class="mb-6 px-4 py-3 rounded-2xl text-sm flex items-center gap-2
-                    {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-100
-                    {% else %}bg-emerald-50 text-emerald-700 border border-emerald-100{% endif %}">
-                    <i class="fa-solid {% if message.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}"></i>
-                    {{ message }}
-                </div>
-                {% endfor %}
-            {% endif %}
-
-            {% if form.non_field_errors %}
-            <div class="mb-6 px-4 py-3 rounded-2xl text-sm bg-red-50 text-red-700 border border-red-100 flex items-center gap-2">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
-            </div>
-            {% endif %}
-
-            <!-- Login Form -->
-            <form method="post" action="{% url 'dashboard:login' %}" novalidate>
+            <!-- Login form -->
+            <form method="post" action="{% url 'dashboard:login' %}" class="space-y-5">
                 {% csrf_token %}
 
-                <!-- Username -->
-                <div class="mb-5">
-                    <label class="block text-sm font-medium mb-2 text-zinc-700">Username</label>
-                    <div class="relative">
-                        <input
-                            type="text"
-                            name="username"
-                            autocomplete="username"
-                            value="{{ form.username.value|default:'' }}"
-                            class="w-full bg-zinc-50 border border-zinc-200 focus:border-yellow-400 rounded-2xl px-5 py-3.5 pl-12 text-sm transition-colors
-                                {% if form.username.errors %}border-red-300 bg-red-50{% endif %}"
-                            placeholder="Enter your username"
-                            required
-                        >
-                        <i class="fa-solid fa-user absolute left-4 top-4 text-zinc-400 text-sm"></i>
+                {% if form.non_field_errors %}
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        {{ form.non_field_errors|join:", " }}
                     </div>
-                    {% for error in form.username.errors %}
-                    <p class="mt-1.5 text-xs text-red-500">{{ error }}</p>
-                    {% endfor %}
+                {% endif %}
+
+                <div>
+                    <label for="id_username" class="block text-sm font-medium text-zinc-700 mb-1.5">Username</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-4 top-3.5 text-zinc-400"></i>
+                        <input type="text" name="username" id="id_username"
+                               class="w-full pl-11 pr-4 py-3 border border-zinc-300 rounded-2xl focus:outline-none input-group"
+                               placeholder="Enter your username" required autofocus>
+                    </div>
+                    {% if form.username.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ form.username.errors|join:", " }}</p>
+                    {% endif %}
                 </div>
 
-                <!-- Password -->
-                <div class="mb-7">
-                    <label class="block text-sm font-medium mb-2 text-zinc-700">Password</label>
+                <div>
+                    <label for="id_password" class="block text-sm font-medium text-zinc-700 mb-1.5">Password</label>
                     <div class="relative">
-                        <input
-                            type="password"
-                            name="password"
-                            id="password"
-                            autocomplete="current-password"
-                            class="w-full bg-zinc-50 border border-zinc-200 focus:border-yellow-400 rounded-2xl px-5 py-3.5 pl-12 pr-12 text-sm transition-colors
-                                {% if form.password.errors %}border-red-300 bg-red-50{% endif %}"
-                            placeholder="Enter your password"
-                            required
-                        >
-                        <i class="fa-solid fa-lock absolute left-4 top-4 text-zinc-400 text-sm"></i>
-                        <button type="button" onclick="togglePassword()"
-                            class="absolute right-4 top-4 text-zinc-400 hover:text-zinc-600 transition-colors">
-                            <i class="fa-solid fa-eye text-sm" id="eye-icon"></i>
-                        </button>
+                        <i class="fa-solid fa-lock absolute left-4 top-3.5 text-zinc-400"></i>
+                        <input type="password" name="password" id="id_password"
+                               class="w-full pl-11 pr-4 py-3 border border-zinc-300 rounded-2xl focus:outline-none input-group"
+                               placeholder="Enter your password" required>
                     </div>
-                    {% for error in form.password.errors %}
-                    <p class="mt-1.5 text-xs text-red-500">{{ error }}</p>
-                    {% endfor %}
+                    {% if form.password.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ form.password.errors|join:", " }}</p>
+                    {% endif %}
                 </div>
 
-                <!-- Hidden next field -->
-                <input type="hidden" name="next" value="{{ next }}">
-
-                <!-- Submit -->
                 <button type="submit"
-                    class="btn-login w-full bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-3.5 rounded-2xl transition-colors">
-                    Sign In to Dashboard
+                        class="btn-primary w-full py-3.5 text-white font-semibold rounded-2xl text-sm transition-colors">
+                    <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i> Sign In
                 </button>
             </form>
 
-            <!-- Footer note -->
-            <p class="mt-8 text-center text-xs text-zinc-400">
-                Access restricted to authorized administrators only.
-            </p>
+  
         </div>
 
-        <!-- Version badge -->
-        <p class="text-center text-xs text-zinc-400 mt-6">SportSphere Dashboard v2.0</p>
+        <!-- Footer -->
+        <p class="text-center text-xs text-zinc-400 mt-6">
+            &copy; 2026 Squad link – All rights reserved.
+        </p>
     </div>
-
-    <script>
-        function togglePassword() {
-            const input = document.getElementById('password');
-            const icon = document.getElementById('eye-icon');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.replace('fa-eye-slash', 'fa-eye');
-            }
-        }
-    </script>
 </body>
 </html>
