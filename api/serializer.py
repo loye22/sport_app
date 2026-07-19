@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import EventStats , RepostComment , AdditionalOption, Hashtag ,GeoLocation ,Venue, UserProfile , ChatMessage , Post , Comment , Event , Notification ,Repost , Category, DeleteRequest
 from django.contrib.auth.models import User
-
+from .services.user_activity import get_user_activity_summary
 
 
 class AdditionalOptionSerializer(serializers.ModelSerializer):
@@ -630,3 +630,40 @@ class DeleteRequestCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeleteRequest
         fields = ['reason']
+
+
+
+
+
+class UserActivitySummarySerializer(serializers.Serializer):
+    activityOverview = serializers.SerializerMethodField()
+    atAGlance = serializers.SerializerMethodField()
+    topActivities = serializers.SerializerMethodField()
+    activityPatterns = serializers.SerializerMethodField()
+    statistics = serializers.SerializerMethodField()
+    bestAttendance = serializers.SerializerMethodField()
+
+    def get_activityOverview(self, obj):
+        # obj is UserProfile instance
+        data = get_user_activity_summary(obj)
+        return data['activityOverview']
+
+    def get_atAGlance(self, obj):
+        data = get_user_activity_summary(obj)
+        return data['atAGlance']
+
+    def get_topActivities(self, obj):
+        data = get_user_activity_summary(obj)
+        return data['topActivities']
+
+    def get_activityPatterns(self, obj):
+        data = get_user_activity_summary(obj)
+        return data['activityPatterns']
+
+    def get_statistics(self, obj):
+        data = get_user_activity_summary(obj)
+        return data['statistics']
+
+    def get_bestAttendance(self, obj):
+        data = get_user_activity_summary(obj)
+        return data['bestAttendance']

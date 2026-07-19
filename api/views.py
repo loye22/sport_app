@@ -3,7 +3,7 @@ from rest_framework.generics import ListAPIView
 from datetime import datetime, timedelta
 from apiapp.settings import DEFAULT_FROM_EMAIL
 from .models import Review ,NoShow ,RepostComment , Repost ,AdditionalOption, EventCancellation ,  UserProfile, Category, Post, Comment , Event , Notification , Venue , Hashtag, DeleteRequest
-from .serializer import  UserProfileUpdateSerializer, UserProfileBasicInfoSerializer , EventCompletedBriefSerializer , EventSerializerEvent , NotificationSerializer ,SearchUserSerializer ,SearchRequestSerializer, EventWithStatsSerializer ,UserProfileDetailSerializer ,RepostCommentSerializer , EventOverlapSerializer  ,CopyEventSerializer  ,HashtagSerializer ,  CategorySerializer,  CancelJoinEventSerializer ,UserProfileSerializer, VenueSerializer, PostSerializer, CommentSerializer , EventSerializer , JoinEventSerializer , UnfollowUserSerializer, RepostSerializer, DeleteRequestSerializer, DeleteRequestCreateSerializer, AdditionalOptionSerializer
+from .serializer import  UserActivitySummarySerializer, UserProfileUpdateSerializer, UserProfileBasicInfoSerializer , EventCompletedBriefSerializer , EventSerializerEvent , NotificationSerializer ,SearchUserSerializer ,SearchRequestSerializer, EventWithStatsSerializer ,UserProfileDetailSerializer ,RepostCommentSerializer , EventOverlapSerializer  ,CopyEventSerializer  ,HashtagSerializer ,  CategorySerializer,  CancelJoinEventSerializer ,UserProfileSerializer, VenueSerializer, PostSerializer, CommentSerializer , EventSerializer , JoinEventSerializer , UnfollowUserSerializer, RepostSerializer, DeleteRequestSerializer, DeleteRequestCreateSerializer, AdditionalOptionSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -3105,6 +3105,16 @@ class GetRepostUserIdView(APIView):
             'user_id': str(repost.user.id)
         }, status=status.HTTP_200_OK)
 
+
+
+
+class UserActivitySummaryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user_profile = request.user.userprofile  # assumes OneToOne exists
+        serializer = UserActivitySummarySerializer(instance=user_profile)
+        return Response(serializer.data)
 
 def index(request):
     pass 
