@@ -643,27 +643,27 @@ class UserActivitySummarySerializer(serializers.Serializer):
     statistics = serializers.SerializerMethodField()
     bestAttendance = serializers.SerializerMethodField()
 
+    def _get_data(self, obj):
+        if not hasattr(self, '_cached_data'):
+            request = self.context.get('request')
+            self._cached_data = get_user_activity_summary(obj, request=request)
+        return self._cached_data
+
     def get_activityOverview(self, obj):
         # obj is UserProfile instance
-        data = get_user_activity_summary(obj)
-        return data['activityOverview']
+        return self._get_data(obj)['activityOverview']
 
     def get_atAGlance(self, obj):
-        data = get_user_activity_summary(obj)
-        return data['atAGlance']
+        return self._get_data(obj)['atAGlance']
 
     def get_topActivities(self, obj):
-        data = get_user_activity_summary(obj)
-        return data['topActivities']
+        return self._get_data(obj)['topActivities']
 
     def get_activityPatterns(self, obj):
-        data = get_user_activity_summary(obj)
-        return data['activityPatterns']
+        return self._get_data(obj)['activityPatterns']
 
     def get_statistics(self, obj):
-        data = get_user_activity_summary(obj)
-        return data['statistics']
+        return self._get_data(obj)['statistics']
 
     def get_bestAttendance(self, obj):
-        data = get_user_activity_summary(obj)
-        return data['bestAttendance']
+        return self._get_data(obj)['bestAttendance']

@@ -48,7 +48,7 @@ def get_actual_members(event):
     return len(members)
 
 
-def get_user_activity_summary(user_profile):
+def get_user_activity_summary(user_profile, request=None):
     """
     Computes the full activity summary for a given UserProfile.
     Returns a dict with keys: activityOverview, atAGlance, topActivities,
@@ -143,6 +143,15 @@ def get_user_activity_summary(user_profile):
         win = data['wins']
         lose = data['losses']
         win_rate_act = f"{int((win / played) * 100) if played > 0 else 0}%"
+        
+        # Category image
+        category_image = ""
+        if first.category and first.category.image:
+            if request:
+                category_image = request.build_absolute_uri(first.category.image.url)
+            else:
+                category_image = first.category.image.url
+
         # Build entry
         entry = {
             'name': title,
@@ -153,6 +162,9 @@ def get_user_activity_summary(user_profile):
             'win': win,
             'lose': lose,
             'winRate': win_rate_act,
+            'categoryImage': category_image,
+            'category_image': category_image,
+            'image': category_image,
         }
         top_activities.append(entry)
 
@@ -204,7 +216,13 @@ def get_user_activity_summary(user_profile):
                     stat_lost += 1
         # Get category image from the first event (or from Category model)
         cat_obj = Category.objects.filter(name=most_active_category).first()
-        stat_img = cat_obj.image.url if cat_obj and cat_obj.image else ""
+        if cat_obj and cat_obj.image:
+            if request:
+                stat_img = request.build_absolute_uri(cat_obj.image.url)
+            else:
+                stat_img = cat_obj.image.url
+        else:
+            stat_img = ""
 
     # 8. bestAttendance
     best_att = None

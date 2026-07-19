@@ -3113,7 +3113,7 @@ class UserActivitySummaryView(APIView):
 
     def get(self, request):
         user_profile = request.user.userprofile  # assumes OneToOne exists
-        serializer = UserActivitySummarySerializer(instance=user_profile)
+        serializer = UserActivitySummarySerializer(instance=user_profile, context={'request': request})
         return Response(serializer.data)
 
 def index(request):
