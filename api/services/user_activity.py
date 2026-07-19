@@ -196,16 +196,28 @@ def get_user_activity_summary(user_profile, request=None):
     max_streak = max(max_streak, current_streak) if dates else 0
     longest_streak = f"{max_streak} Weeks" if max_streak > 0 else "0 Weeks"
 
-    # 7. statistics – use the most active category
-    stat_sport = most_active_category or "N/A"
-    stat_win = 0
-    stat_lost = 0
-    stat_match = 0
-    stat_img = ""
-    if most_active_category:
+    # 7. statistics – list of the last 10 unique categories (without repeat)
+    statistics_list = []
+    last_categories = []
+    seen_category_ids = set()
+    
+    # Sort participated events in Python to avoid another database query
+    sorted_events = sorted(participated_events, key=lambda e: (e.date, e.start_time), reverse=True)
+    
+    for event in sorted_events:
+        if event.category:
+            if event.category.id not in seen_category_ids:
+                seen_category_ids.add(event.category.id)
+                last_categories.append(event.category)
+                if len(last_categories) == 10:
+                    break
+
+    for cat_obj in last_categories:
         # Filter completed events in that category
-        cat_events = [e for e in completed_events if e.category and e.category.name == most_active_category]
+        cat_events = [e for e in completed_events if e.category and e.category.id == cat_obj.id]
         stat_match = len(cat_events)
+        stat_win = 0
+        stat_lost = 0
         for e in cat_events:
             user_team = get_user_team(e, user_profile)
             stats = getattr(e, 'stats', None)
@@ -214,15 +226,21 @@ def get_user_activity_summary(user_profile, request=None):
                     stat_win += 1
                 else:
                     stat_lost += 1
-        # Get category image from the first event (or from Category model)
-        cat_obj = Category.objects.filter(name=most_active_category).first()
-        if cat_obj and cat_obj.image:
+        
+        stat_img = ""
+        if cat_obj.image:
             if request:
                 stat_img = request.build_absolute_uri(cat_obj.image.url)
             else:
                 stat_img = cat_obj.image.url
-        else:
-            stat_img = ""
+
+        statistics_list.append({
+            'sport': cat_obj.name,
+            'win': stat_win,
+            'lost': stat_lost,
+            'match': stat_match,
+            'img': stat_img,
+        })
 
     # 8. bestAttendance
     best_att = None
@@ -259,13 +277,7 @@ def get_user_activity_summary(user_profile, request=None):
             'averagePercentage': avg_pct,
             'longestStreak': longest_streak,
         },
-        'statistics': {
-            'sport': stat_sport,
-            'win': stat_win,
-            'lost': stat_lost,
-            'match': stat_match,
-            'img': stat_img,
-        },
+        'statistics': statistics_list,
         'bestAttendance': best_att or {
             'activity': 'N/A',
             'average': '0%',
