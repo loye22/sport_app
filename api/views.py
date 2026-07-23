@@ -1631,8 +1631,54 @@ class AllEventsView(APIView):
         # Serialize the events
         serializer = EventSerializer(events, many=True, context={'request': request})
 
-        # Return the serialized data
-        return Response(serializer.data, status=200)
+        # Retrieve the current user's profile ID
+        current_user_id = None
+        try:
+            current_user_id = str(request.user.userprofile.id)
+        except AttributeError:
+            pass
+
+        # Return the serialized data including the current user's profile ID
+        return Response({
+            'current_user_id': current_user_id,
+            'user_id': current_user_id,
+            'events': serializer.data
+        }, status=200)
+
+class AllEventsThatIsMineView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            user_profile = request.user.userprofile
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Retrieve events where the user is either the host or a member of any team
+        events = Event.objects.filter(
+            Q(host=user_profile) |
+            Q(team_a_members=user_profile) |
+            Q(team_b_members=user_profile) |
+            Q(team_c_members=user_profile) |
+            Q(team_d_members=user_profile) |
+            Q(team_e_members=user_profile) |
+            Q(team_f_members=user_profile) |
+            Q(team_g_members=user_profile) |
+            Q(team_h_members=user_profile)
+        ).distinct()
+
+        # Serialize the events
+        serializer = EventSerializer(events, many=True, context={'request': request})
+
+        # Retrieve the current user's profile ID
+        current_user_id = str(user_profile.id)
+
+        # Return the serialized data including the current user's profile ID
+        return Response({
+            'current_user_id': current_user_id,
+            'user_id': current_user_id,
+            'events': serializer.data
+        }, status=200)
 
 class CompletedParticipatedEventsView(APIView):
     permission_classes = [IsAuthenticated]
