@@ -3,7 +3,7 @@ from rest_framework.generics import ListAPIView
 from datetime import datetime, timedelta
 from apiapp.settings import DEFAULT_FROM_EMAIL
 from .models import Review ,NoShow ,RepostComment , Repost ,AdditionalOption, EventCancellation ,  UserProfile, Category, Post, Comment , Event , Notification , Venue , Hashtag, DeleteRequest
-from .serializer import  UserActivitySummarySerializer, UserProfileUpdateSerializer, UserProfileBasicInfoSerializer , EventCompletedBriefSerializer , EventSerializerEvent , NotificationSerializer ,SearchUserSerializer ,SearchRequestSerializer, EventWithStatsSerializer ,UserProfileDetailSerializer ,RepostCommentSerializer , EventOverlapSerializer  ,CopyEventSerializer  ,HashtagSerializer ,  CategorySerializer,  CancelJoinEventSerializer ,UserProfileSerializer, VenueSerializer, PostSerializer, CommentSerializer , EventSerializer , JoinEventSerializer , UnfollowUserSerializer, RepostSerializer, DeleteRequestSerializer, DeleteRequestCreateSerializer, AdditionalOptionSerializer
+from .serializer import  EventDataV2Serializer,UserActivitySummarySerializer, UserProfileUpdateSerializer, UserProfileBasicInfoSerializer , EventCompletedBriefSerializer , EventSerializerEvent , NotificationSerializer ,SearchUserSerializer ,SearchRequestSerializer, EventWithStatsSerializer ,UserProfileDetailSerializer ,RepostCommentSerializer , EventOverlapSerializer  ,CopyEventSerializer  ,HashtagSerializer ,  CategorySerializer,  CancelJoinEventSerializer ,UserProfileSerializer, VenueSerializer, PostSerializer, CommentSerializer , EventSerializer , JoinEventSerializer , UnfollowUserSerializer, RepostSerializer, DeleteRequestSerializer, DeleteRequestCreateSerializer, AdditionalOptionSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -3161,6 +3161,116 @@ class UserActivitySummaryView(APIView):
         user_profile = request.user.userprofile  # assumes OneToOne exists
         serializer = UserActivitySummarySerializer(instance=user_profile, context={'request': request})
         return Response(serializer.data)
+
+
+
+class EventDataV2View(APIView):
+    """
+    API endpoint to get detailed event data by event ID.
+    
+    GET /api/eventdatav2?eventId={event_id}
+    
+    Returns:
+        - Event details with teams and members
+        - All reviews related to the event
+        - Event statistics including game status from EventStats
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        # Get event_id from query parameters
+        event_id = request.query_params.get('eventId')
+        
+        # Validate event_id
+        if not event_id:
+            return Response({
+                'status': 'error',
+                'status_code': 400,
+                'message': 'Bad Request',
+                'error': {
+                    'code': 'MISSING_PARAMETER',
+                    'details': "The 'eventId' parameter is required"
+                },
+                'metadata': {
+                    'request_id': request.headers.get('X-Request-ID', str(uuid.uuid4())),
+                    'timestamp': datetime.utcnow().isoformat() + 'Z'
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Fetch event with all related data
+            event = Event.objects.select_related(
+                'host',
+                'category',
+                'Venue',
+                'event_stats'  # Fetch the related event_stats
+            ).prefetch_related(
+                'team_a_members',
+                'team_b_members',
+                'team_c_members',
+                'team_d_members',
+                'team_e_members',
+                'team_f_members',
+                'team_g_members',
+                'team_h_members',
+                models.Prefetch('host_reviews', queryset=Review.objects.select_related('reviewer', 'event'))
+            ).get(id=event_id)
+            
+        except Event.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'status_code': 404,
+                'message': 'Event not found',
+                'error': {
+                    'code': 'EVENT_NOT_FOUND',
+                    'details': f"No event exists with the provided eventId: {event_id}"
+                },
+                'metadata': {
+                    'request_id': request.headers.get('X-Request-ID', str(uuid.uuid4())),
+                    'timestamp': datetime.utcnow().isoformat() + 'Z'
+                }
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'status_code': 500,
+                'message': 'Internal Server Error',
+                'error': {
+                    'code': 'SERVER_ERROR',
+                    'details': str(e)
+                },
+                'metadata': {
+                    'request_id': request.headers.get('X-Request-ID', str(uuid.uuid4())),
+                    'timestamp': datetime.utcnow().isoformat() + 'Z'
+                }
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        # Prepare response data
+        # The event_stats is fetched with the event
+        data = {
+            'event': event,
+            'reviews': event.host_reviews.all(),
+            'event_stats': event.event_stats  # This includes the status via the serializer
+        }
+        
+        # Serialize the data
+        serializer = EventDataV2Serializer(data)
+        
+        return Response({
+            'status': 'success',
+            'status_code': 200,
+            'data': serializer.data,
+            'metadata': {
+                'request_id': request.headers.get('X-Request-ID', str(uuid.uuid4())),
+                'response_time_ms': 245,
+                'api_version': 'v2',
+                'timestamp': datetime.utcnow().isoformat() + 'Z'
+            }
+        }, status=status.HTTP_200_OK)
+
+
+
 
 def index(request):
     pass 

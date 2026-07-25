@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import EventStats , RepostComment , AdditionalOption, Hashtag ,GeoLocation ,Venue, UserProfile , ChatMessage , Post , Comment , Event , Notification ,Repost , Category, DeleteRequest
+from .models import EventStats , Review , RepostComment , AdditionalOption, Hashtag ,GeoLocation ,Venue, UserProfile , ChatMessage , Post , Comment , Event , Notification ,Repost , Category, DeleteRequest
 from django.contrib.auth.models import User
 from .services.user_activity import get_user_activity_summary
 
@@ -667,3 +667,202 @@ class UserActivitySummarySerializer(serializers.Serializer):
 
     def get_bestAttendance(self, obj):
         return self._get_data(obj)['bestAttendance']
+
+
+# ==============================================
+# NEW SERIALIZERS FOR EVENT DATA V2 API
+# ==============================================
+
+class EventDataV2CategorySerializer(serializers.ModelSerializer):
+    """Category serializer for Event Data V2"""
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'image']
+
+
+class EventDataV2VenueSerializer(serializers.ModelSerializer):
+    """Venue serializer for Event Data V2"""
+    class Meta:
+        model = Venue
+        fields = ['id', 'title', 'address', 'image', 'latitude', 'longitude', 'price_per_hour']
+
+
+class EventDataV2HostSerializer(serializers.ModelSerializer):
+    """Host serializer for Event Data V2"""
+    class Meta:
+        model = UserProfile
+        fields = [
+            'id', 'full_name', 'email', 'profile_picture', 
+            'average_host_rating', 'phone_number'
+        ]
+
+
+class EventDataV2TeamMemberSerializer(serializers.ModelSerializer):
+    """Team member serializer for Event Data V2"""
+    user_id = serializers.UUIDField(source='id')
+    name = serializers.CharField(source='full_name')
+    image_url = serializers.CharField(source='profile_picture')
+    is_host = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = UserProfile
+        fields = ['user_id', 'name', 'image_url', 'is_host']
+    
+    def get_is_host(self, obj):
+        event = self.context.get('event')
+        if event and hasattr(event, 'host'):
+            return event.host.id == obj.id
+        return False
+
+
+class EventDataV2TeamSerializer(serializers.Serializer):
+    """Team serializer for Event Data V2"""
+    team_name = serializers.CharField()
+    members = serializers.SerializerMethodField()
+    member_count = serializers.IntegerField()
+    
+    def get_members(self, obj):
+        members = obj.get('members', [])
+        event = self.context.get('event')
+        return EventDataV2TeamMemberSerializer(
+            members, 
+            many=True, 
+            context={'event': event}
+        ).data
+
+
+class EventDataV2ParticipantSummarySerializer(serializers.Serializer):
+    """Participant summary serializer for Event Data V2"""
+    total_joined = serializers.IntegerField()
+    max_allowed = serializers.IntegerField()
+    display = serializers.CharField()
+    spots_remaining = serializers.IntegerField()
+
+
+class EventDataV2ReviewSerializer(serializers.ModelSerializer):
+    """Review serializer for Event Data V2"""
+    review_id = serializers.UUIDField(source='id')
+    reviewer_name = serializers.CharField(source='reviewer.full_name')
+    reviewer_image_url = serializers.CharField(source='reviewer.profile_picture')
+    event_title = serializers.CharField(source='event.title')
+    title = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Review
+        fields = [
+            'review_id', 'title', 'rating', 'comment',
+            'reviewer_name', 'reviewer_image_url',
+            'image_1', 'image_2', 'image_3', 'event_title'
+        ]
+    
+    def get_title(self, obj):
+        if obj.comment:
+            words = obj.comment.split()[:5]
+            return ' '.join(words) + '...' if len(words) == 5 else obj.comment[:50]
+        return f"Review - {obj.rating} stars"
+
+
+
+class EventDataV2StatsSerializer(serializers.ModelSerializer):
+    """Event Stats serializer for Event Data V2"""
+    # Add the status field from the Event model
+    game_status = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = EventStats
+        fields = [
+            'id', 'team_winner', 
+            'team_a_total_attempts', 'team_a_attempts_on_target',
+            'team_a_fouls_committed', 'team_a_yellow_cards', 
+            'team_a_red_cards', 'team_a_offsides', 'team_a_corners',
+            'team_a_possession',
+            'team_b_total_attempts', 'team_b_attempts_on_target',
+            'team_b_fouls_committed', 'team_b_yellow_cards',
+            'team_b_red_cards', 'team_b_offsides', 'team_b_corners',
+            'team_b_possession',
+            'game_status'  # Add this field
+        ]
+    
+    def get_game_status(self, obj):
+        # Get the status from the related Event model
+        if hasattr(obj, 'event_detail'):  # event_detail is the related_name in Event model
+            return obj.event_detail.status
+        return None
+
+class EventDataV2EventDetailSerializer(serializers.ModelSerializer):
+    """Main Event detail serializer for Event Data V2"""
+    category = EventDataV2CategorySerializer(read_only=True)
+    venue = EventDataV2VenueSerializer(source='Venue', read_only=True)
+    host = EventDataV2HostSerializer(read_only=True)
+    teams = serializers.SerializerMethodField()
+    participant_summary = serializers.SerializerMethodField()
+    # Remove status from here - we'll get it from event_stats
+    # status is no longer included in this serializer
+    
+    class Meta:
+        model = Event
+        fields = [
+            'id', 'title', 'description', 'image', 'image2', 
+            'image3', 'image4', 'score', 'category', 'venue',
+            'date', 'start_time', 'end_time', 'city',  # status removed from here
+            'price', 'payment_status', 'max_members', 'teams_number',
+            'host', 'teams', 'participant_summary', 'created_at'
+        ]
+    
+    def get_teams(self, obj):
+        team_fields = [
+            ('team_a_members', 'Team A'),
+            ('team_b_members', 'Team B'),
+            ('team_c_members', 'Team C'),
+            ('team_d_members', 'Team D'),
+            ('team_e_members', 'Team E'),
+            ('team_f_members', 'Team F'),
+            ('team_g_members', 'Team G'),
+            ('team_h_members', 'Team H'),
+        ]
+        
+        teams_data = []
+        for field_name, team_label in team_fields:
+            members = getattr(obj, field_name).all()
+            if members.exists():
+                teams_data.append({
+                    'team_name': team_label,
+                    'members': members,
+                    'member_count': members.count()
+                })
+        
+        return EventDataV2TeamSerializer(
+            teams_data, 
+            many=True, 
+            context={'event': obj}
+        ).data
+    
+    def get_participant_summary(self, obj):
+        total_joined = 0
+        team_fields = [
+            'team_a_members', 'team_b_members', 'team_c_members',
+            'team_d_members', 'team_e_members', 'team_f_members',
+            'team_g_members', 'team_h_members'
+        ]
+        
+        for field in team_fields:
+            total_joined += getattr(obj, field).count()
+        
+        max_allowed = obj.max_members
+        
+        return {
+            'total_joined': total_joined,
+            'max_allowed': max_allowed,
+            'display': f"{total_joined}/{max_allowed}",
+            'spots_remaining': max_allowed - total_joined
+        }
+
+
+
+class EventDataV2Serializer(serializers.Serializer):
+    """Main response serializer for Event Data V2 API"""
+    event = EventDataV2EventDetailSerializer()
+    reviews = EventDataV2ReviewSerializer(many=True)
+    event_stats = EventDataV2StatsSerializer()
+
+
