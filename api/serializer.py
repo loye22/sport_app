@@ -703,15 +703,26 @@ class EventDataV2TeamMemberSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='full_name')
     image_url = serializers.CharField(source='profile_picture')
     is_host = serializers.SerializerMethodField()
+    isFollowed = serializers.SerializerMethodField()
     
     class Meta:
         model = UserProfile
-        fields = ['user_id', 'name', 'image_url', 'is_host']
+        fields = ['user_id', 'name', 'image_url', 'is_host', 'isFollowed']
     
     def get_is_host(self, obj):
         event = self.context.get('event')
         if event and hasattr(event, 'host'):
             return event.host.id == obj.id
+        return False
+
+    def get_isFollowed(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            try:
+                requester_profile = request.user.userprofile
+                return requester_profile.following.filter(id=obj.id).exists()
+            except Exception:
+                return False
         return False
 
 
@@ -724,10 +735,11 @@ class EventDataV2TeamSerializer(serializers.Serializer):
     def get_members(self, obj):
         members = obj.get('members', [])
         event = self.context.get('event')
+        request = self.context.get('request')
         return EventDataV2TeamMemberSerializer(
             members, 
             many=True, 
-            context={'event': event}
+            context={'event': event, 'request': request}
         ).data
 
 
@@ -831,10 +843,11 @@ class EventDataV2EventDetailSerializer(serializers.ModelSerializer):
                     'member_count': members.count()
                 })
         
+        request = self.context.get('request')
         return EventDataV2TeamSerializer(
             teams_data, 
             many=True, 
-            context={'event': obj}
+            context={'event': obj, 'request': request}
         ).data
     
     def get_participant_summary(self, obj):

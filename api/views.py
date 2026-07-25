@@ -3255,7 +3255,7 @@ class EventDataV2View(APIView):
         }
         
         # Serialize the data
-        serializer = EventDataV2Serializer(data)
+        serializer = EventDataV2Serializer(data, context={'request': request})
         
         return Response({
             'status': 'success',
