@@ -17,12 +17,12 @@ class UserProfileAdmin(admin.ModelAdmin):
    
 
 
-class VenueAdmin(admin.ModelAdmin):
-    list_display = ('id' , 'title', 'address', 'image', 'description', 'category', 'created_by', 'status', 'created_at')
-    search_fields = ('title', 'address', 'description')
-    list_filter = ('status', 'created_at')
-    ordering = ('-created_at',)
-    filter_horizontal = ('additional_options',)  # Add this line to display the additional_options field as a horizontal filter
+# class VenueAdmin(admin.ModelAdmin):
+#     list_display = ('id' , 'title', 'address', 'image', 'description', 'category', 'created_by', 'status', 'created_at')
+#     search_fields = ('title', 'address', 'description')
+#     list_filter = ('status', 'created_at')
+#     ordering = ('-created_at',)
+#     filter_horizontal = ('additional_options',)  # Add this line to display the additional_options field as a horizontal filter
 
 
 
@@ -185,7 +185,6 @@ admin.site.register(Event , EventAdmin)
 admin.site.register(AdditionalOption , AdditionalOptionAdmin)
 admin.site.register(Hashtag,  HashtagAdmin)
 admin.site.register(Category,CategoryAdmin)
-admin.site.register(Venue,VenueAdmin)
 admin.site.register(Post , PostAdmin )
 admin.site.register(Comment,CommentAdmin)
 admin.site.register(StoredImage, StoredImageAdmin)

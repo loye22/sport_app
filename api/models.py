@@ -425,6 +425,11 @@ class Review(models.Model):
         decimal_places=2,  # Number of decimal places
         validators=[MinValueValidator(1.0), MaxValueValidator(5.0)]  # Ensure the value is between 1.0 and 5.0
     )
+    image_1 = models.URLField(max_length=500, blank=True, null=True)
+    image_2 = models.URLField(max_length=500, blank=True, null=True)
+    image_3 = models.URLField(max_length=500, blank=True, null=True)
+    comment = models.TextField(blank=True, null=True)
+    
 
 
 class DeleteRequest(models.Model):
