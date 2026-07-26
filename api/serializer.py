@@ -872,10 +872,22 @@ class EventDataV2EventDetailSerializer(serializers.ModelSerializer):
 
 
 
+class EventDataV2RequesterSerializer(serializers.ModelSerializer):
+    """Requester (authenticated user) serializer for Event Data V2"""
+    user_id = serializers.UUIDField(source='id')
+    name = serializers.CharField(source='full_name')
+    profile_url = serializers.CharField(source='profile_picture')
+
+    class Meta:
+        model = UserProfile
+        fields = ['user_id', 'name', 'profile_url']
+
+
 class EventDataV2Serializer(serializers.Serializer):
     """Main response serializer for Event Data V2 API"""
     event = EventDataV2EventDetailSerializer()
     reviews = EventDataV2ReviewSerializer(many=True)
     event_stats = EventDataV2StatsSerializer()
+    requester_data = EventDataV2RequesterSerializer()
 
 

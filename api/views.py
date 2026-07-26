@@ -3251,7 +3251,8 @@ class EventDataV2View(APIView):
         data = {
             'event': event,
             'reviews': event.host_reviews.all(),
-            'event_stats': event.event_stats  # This includes the status via the serializer
+            'event_stats': event.event_stats,  # This includes the status via the serializer
+            'requester_data': request.user.userprofile,  # Authenticated requester's profile
         }
         
         # Serialize the data
