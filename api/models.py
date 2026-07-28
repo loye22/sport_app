@@ -429,6 +429,11 @@ class Review(models.Model):
     image_2 = models.URLField(max_length=500, blank=True, null=True)
     image_3 = models.URLField(max_length=500, blank=True, null=True)
     comment = models.TextField(blank=True, null=True)
+    host_rating = models.IntegerField(
+        blank=True, null=True,
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    host_comment = models.TextField(blank=True, null=True)
     
 
 
