@@ -755,18 +755,21 @@ class EventDataV2ReviewSerializer(serializers.ModelSerializer):
     """Review serializer for Event Data V2"""
     review_id = serializers.UUIDField(source='id')
     reviewer_name = serializers.CharField(source='reviewer.full_name')
-    reviewer_image_url = serializers.CharField(source='reviewer.profile_picture')
+    reviewer_image_url = serializers.CharField(
+        source='reviewer.profile_picture', allow_null=True, default=None
+    )
     event_title = serializers.CharField(source='event.title')
     title = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Review
         fields = [
             'review_id', 'title', 'rating', 'comment',
+            'host_rating', 'host_comment',
             'reviewer_name', 'reviewer_image_url',
-            'image_1', 'image_2', 'image_3', 'event_title'
+            'image_1', 'image_2', 'image_3', 'event_title',
         ]
-    
+
     def get_title(self, obj):
         if obj.comment:
             words = obj.comment.split()[:5]
