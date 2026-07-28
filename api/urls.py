@@ -1,6 +1,6 @@
 from django.urls import path, include
 from django.urls import path
-from .views import  EventDataV2View, UserActivitySummaryView,   UserSearchView ,DeletePostAPIView ,UpdatePostAPIView ,PostDetailAPIView , GetPostParticipantsView , GetSavedItemsView , CheckEmailExistsView ,SaveRepostView ,SavePostView , IncreaseAllViewsAPIView, CreateNewCategoryView ,AddReviewView ,GetUserAverageReviewView ,GetUserAbsenceFlagView ,KickUserFromEventView ,CreateNoShowView ,GetUserEventProfileByIDView ,GetUserEventsByIDView ,GetUserPostsAndRepostsByIDView , GetUserInfoTabStatsByIDView ,GetUserProfileByIDView , PasswordResetRequestView , MarkNotificationsReadView, NotificationListView ,GetFollowersAndFollowingView, GetUserByIDView ,GetCurrentUserIDView ,GetCurrentUsernameView ,SearchAPIView ,AllEventsView , AllEventsThatIsMineView, UserCategoryStatsView , UserEventProfile ,UserRepostsView , UserPostsView , UserProfileTapDetailView ,ReportRepostView , LikeRepostCommentView ,AddRepostCommentView, LikeRepostView ,RepostCommentListView , RepostListView , AddRepostView , AddCommentView , LikeCommentView, CommentListView , CreatePostAPIView , UserProfileListAPIView , CreateVenueAPIView , MyHostedEventsView, HostedActivitiesAsHostView, CopyEventView ,CheckDateView,UserProfileDetailView , MyEventsView  ,HashtagListCreateView ,  VenueView,PostView , CommentView , ReportPostView , SignupView , LoginView , FollowUserView , LikePostView , EventView , JoinEventView , CancelJoinEventView , CompleteEventView , GetEventView , UpdateEventView , UnfollowUserView  , FileUploadView ,   CategoryListView, CompletedParticipatedEventsView, ProfileBasicInfoView, ProfileUpdateView, DeleteProfileView, DeleteRequestView, RelationStatusView, AmITheEventHostView, CreateAdditionalOptionView, GetAdditionalOptionsByEventView, OtherAddibleOptionView, GetRepostUserIdView
+from .views import  EventDataV2View, UserActivitySummaryView,   UserSearchView ,DeletePostAPIView ,UpdatePostAPIView ,PostDetailAPIView , GetPostParticipantsView , GetSavedItemsView , CheckEmailExistsView ,SaveRepostView ,SavePostView , IncreaseAllViewsAPIView, CreateNewCategoryView ,AddReviewView ,GetUserAverageReviewView ,GetUserAbsenceFlagView ,KickUserFromEventView ,CreateNoShowView ,GetUserEventProfileByIDView ,GetUserEventsByIDView ,GetUserPostsAndRepostsByIDView , GetUserInfoTabStatsByIDView ,GetUserProfileByIDView , PasswordResetRequestView , MarkNotificationsReadView, NotificationListView ,GetFollowersAndFollowingView, GetUserByIDView ,GetCurrentUserIDView ,GetCurrentUsernameView ,SearchAPIView ,AllEventsView , AllEventsThatIsMineView, UserCategoryStatsView , UserEventProfile ,UserRepostsView , UserPostsView , UserProfileTapDetailView ,ReportRepostView , LikeRepostCommentView ,AddRepostCommentView, LikeRepostView ,RepostCommentListView , RepostListView , AddRepostView , AddCommentView , LikeCommentView, CommentListView , CreatePostAPIView , UserProfileListAPIView , CreateVenueAPIView , MyHostedEventsView, HostedActivitiesAsHostView, CopyEventView ,CheckDateView,UserProfileDetailView , MyEventsView  ,HashtagListCreateView ,  VenueView,PostView , CommentView , ReportPostView , SignupView , LoginView , FollowUserView , LikePostView , EventView , JoinEventView , CancelJoinEventView , CompleteEventView , GetEventView , UpdateEventView , UnfollowUserView  , FileUploadView ,   CategoryListView, CompletedParticipatedEventsView, ProfileBasicInfoView, ProfileUpdateView, DeleteProfileView, DeleteRequestView, RelationStatusView, AmITheEventHostView, CreateAdditionalOptionView, GetAdditionalOptionsByEventView, OtherAddibleOptionView, GetRepostUserIdView, GetReviewV2View, SubmitReviewView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 
@@ -94,27 +94,8 @@ urlpatterns = [
             path('get_repost_user_id/', GetRepostUserIdView.as_view(), name='get-repost-user-id'),
             path('activity-summary/', UserActivitySummaryView.as_view(), name='user-activity-summary'),
             path('eventdatav2', EventDataV2View.as_view(), name='event-data-v2'),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            path('reviews/', GetReviewV2View.as_view(), name='get-reviews-v2'),
+            path('submit_review/', SubmitReviewView.as_view(), name='submit-review'),
 
 
                 

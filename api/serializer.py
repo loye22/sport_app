@@ -891,3 +891,47 @@ class EventDataV2Serializer(serializers.Serializer):
     requester_data = EventDataV2RequesterSerializer()
 
 
+# ==============================================
+# REVIEW V2 SERIALIZERS
+# ==============================================
+
+class ReviewV2Serializer(serializers.ModelSerializer):
+    """
+    Read serializer for GetReviewV2.
+    Returns all review fields plus reviewer name and profile photo.
+    """
+    reviewer_name = serializers.CharField(source='reviewer.full_name', read_only=True)
+    reviewer_profile_picture = serializers.CharField(source='reviewer.profile_picture', read_only=True)
+
+    class Meta:
+        model = Review
+        fields = [
+            'id',
+            'rating',
+            'comment',
+            'host_rating',
+            'host_comment',
+            'image_1',
+            'image_2',
+            'image_3',
+            'reviewer_name',
+            'reviewer_profile_picture',
+        ]
+
+
+class SubmitReviewSerializer(serializers.ModelSerializer):
+    """
+    Write serializer for SubmitReview.
+    Accepts all review fields; host / reviewer / event are set in the view.
+    """
+    class Meta:
+        model = Review
+        fields = [
+            'rating',
+            'comment',
+            'host_rating',
+            'host_comment',
+            'image_1',
+            'image_2',
+            'image_3',
+        ]

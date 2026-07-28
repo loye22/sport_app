@@ -3,7 +3,7 @@ from rest_framework.generics import ListAPIView
 from datetime import datetime, timedelta
 from apiapp.settings import DEFAULT_FROM_EMAIL
 from .models import Review ,NoShow ,RepostComment , Repost ,AdditionalOption, EventCancellation ,  UserProfile, Category, Post, Comment , Event , Notification , Venue , Hashtag, DeleteRequest
-from .serializer import  EventDataV2Serializer,UserActivitySummarySerializer, UserProfileUpdateSerializer, UserProfileBasicInfoSerializer , EventCompletedBriefSerializer , EventSerializerEvent , NotificationSerializer ,SearchUserSerializer ,SearchRequestSerializer, EventWithStatsSerializer ,UserProfileDetailSerializer ,RepostCommentSerializer , EventOverlapSerializer  ,CopyEventSerializer  ,HashtagSerializer ,  CategorySerializer,  CancelJoinEventSerializer ,UserProfileSerializer, VenueSerializer, PostSerializer, CommentSerializer , EventSerializer , JoinEventSerializer , UnfollowUserSerializer, RepostSerializer, DeleteRequestSerializer, DeleteRequestCreateSerializer, AdditionalOptionSerializer
+from .serializer import  EventDataV2Serializer,UserActivitySummarySerializer, UserProfileUpdateSerializer, UserProfileBasicInfoSerializer , EventCompletedBriefSerializer , EventSerializerEvent , NotificationSerializer ,SearchUserSerializer ,SearchRequestSerializer, EventWithStatsSerializer ,UserProfileDetailSerializer ,RepostCommentSerializer , EventOverlapSerializer  ,CopyEventSerializer  ,HashtagSerializer ,  CategorySerializer,  CancelJoinEventSerializer ,UserProfileSerializer, VenueSerializer, PostSerializer, CommentSerializer , EventSerializer , JoinEventSerializer , UnfollowUserSerializer, RepostSerializer, DeleteRequestSerializer, DeleteRequestCreateSerializer, AdditionalOptionSerializer, ReviewV2Serializer, SubmitReviewSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -3271,6 +3271,141 @@ class EventDataV2View(APIView):
         }, status=status.HTTP_200_OK)
 
 
+
+
+# ==============================================
+# REVIEW V2 ENDPOINTS
+# ==============================================
+
+class GetReviewV2View(APIView):
+    """
+    GET /api/reviews/?event_id=<uuid>
+    Returns all reviews for the given event, including
+    the reviewer's name and profile photo URL.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        event_id = request.query_params.get('event_id')
+
+        if not event_id:
+            return Response(
+                {'error': 'event_id query parameter is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            event = Event.objects.get(id=event_id)
+        except Event.DoesNotExist:
+            return Response(
+                {'error': 'Event not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception:
+            return Response(
+                {'error': 'Invalid event_id format.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        reviews = (
+            Review.objects
+            .filter(event=event)
+            .select_related('reviewer')
+            .order_by('-id')
+        )
+
+        serializer = ReviewV2Serializer(reviews, many=True)
+        return Response(
+            {
+                'event_id': str(event.id),
+                'event_title': event.title,
+                'review_count': reviews.count(),
+                'reviews': serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+class SubmitReviewView(APIView):
+    """
+    POST /api/submit_review/
+    Body: { event_id, rating, comment?, host_rating?, host_comment?,
+            image_1?, image_2?, image_3? }
+    The authenticated user becomes the reviewer;
+    the event's host is automatically set as the host.
+    Prevents duplicate reviews (one per reviewer per event).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        event_id = request.data.get('event_id')
+
+        if not event_id:
+            return Response(
+                {'error': 'event_id is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Resolve event
+        try:
+            event = Event.objects.select_related('host').get(id=event_id)
+        except Event.DoesNotExist:
+            return Response(
+                {'error': 'Event not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception:
+            return Response(
+                {'error': 'Invalid event_id format.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Reviewer is always the authenticated user
+        try:
+            reviewer = request.user.userprofile
+        except UserProfile.DoesNotExist:
+            return Response(
+                {'error': 'Reviewer profile not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        host = event.host
+
+        # Prevent self-review
+        if reviewer == host:
+            return Response(
+                {'error': 'You cannot review your own event.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Prevent duplicate reviews
+        if Review.objects.filter(reviewer=reviewer, event=event).exists():
+            return Response(
+                {'error': 'You have already submitted a review for this event.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = SubmitReviewSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            review = serializer.save(host=host, reviewer=reviewer, event=event)
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': f'An unexpected error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response(
+            {
+                'message': 'Review submitted successfully.',
+                'review_id': str(review.id),
+            },
+            status=status.HTTP_201_CREATED
+        )
 
 
 def index(request):
