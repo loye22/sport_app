@@ -3408,5 +3408,60 @@ class SubmitReviewView(APIView):
         )
 
 
+class UpdateEventScoreView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def _update_score(self, request, event_id=None):
+        event_id = event_id or request.data.get('event_id')
+        score = request.data.get('score') if request.data.get('score') is not None else request.data.get('new_score')
+
+        if not event_id:
+            return Response({'error': 'event_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if score is None:
+            return Response({'error': 'score is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            event_uuid = UUID(str(event_id))
+        except ValueError:
+            return Response({'error': 'Invalid event_id format'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user_profile = request.user.userprofile
+        except (AttributeError, UserProfile.DoesNotExist):
+            return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            event = Event.objects.get(id=event_uuid)
+        except Event.DoesNotExist:
+            return Response({'error': 'Event not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if the authenticated user is the host of the event
+        if user_profile != event.host:
+            return Response({'error': 'Only the event host can update the score'}, status=status.HTTP_403_FORBIDDEN)
+
+        score_str = str(score).strip()
+        if len(score_str) > 5:
+            return Response({'error': 'Score exceeds maximum allowed length of 5 characters'}, status=status.HTTP_400_BAD_REQUEST)
+
+        event.score = score_str
+        event.save()
+
+        return Response({
+            'status': 'Event score updated successfully',
+            'event_id': str(event.id),
+            'score': event.score
+        }, status=status.HTTP_200_OK)
+
+    def post(self, request, event_id=None, *args, **kwargs):
+        return self._update_score(request, event_id)
+
+    def put(self, request, event_id=None, *args, **kwargs):
+        return self._update_score(request, event_id)
+
+    def patch(self, request, event_id=None, *args, **kwargs):
+        return self._update_score(request, event_id)
+
+
 def index(request):
     pass 
