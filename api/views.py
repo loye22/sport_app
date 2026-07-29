@@ -410,7 +410,10 @@ class CompleteEventView(APIView):
             return Response({'error': 'event_id is required'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            event = Event.objects.get(id=event_id)
+            event_uuid = UUID(str(event_id))
+            event = Event.objects.get(id=event_uuid)
+        except (ValueError, TypeError, ValidationError):
+            return Response({'error': 'Invalid event_id format'}, status=status.HTTP_400_BAD_REQUEST)
         except Event.DoesNotExist:
             return Response({'error': 'Event not found'}, status=status.HTTP_404_NOT_FOUND)
         
@@ -428,6 +431,41 @@ class CompleteEventView(APIView):
         
         return Response({
             'status': 'Event marked as completed successfully',
+            'event_id': str(event.id),
+            'event_title': event.title,
+            'new_status': event.status
+        }, status=status.HTTP_200_OK)
+
+
+class CancelEventView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        event_id = request.data.get('event_id')
+        cancellation_reason = request.data.get('cancellation_reason') or request.data.get('reason')
+
+        if not event_id:
+            return Response({'error': 'event_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            event_uuid = UUID(str(event_id))
+            event = Event.objects.get(id=event_uuid)
+        except (ValueError, TypeError, ValidationError):
+            return Response({'error': 'Invalid event_id format'}, status=status.HTTP_400_BAD_REQUEST)
+        except Event.DoesNotExist:
+            return Response({'error': 'Event not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if the authenticated user is the host of the event
+        if request.user.userprofile != event.host:
+            return Response({'error': 'Only the event host can cancel the event'}, status=status.HTTP_403_FORBIDDEN)
+
+        event.status = 'Cancelled'
+        if cancellation_reason:
+            event.cancellation_reason = cancellation_reason
+        event.save()
+
+        return Response({
+            'status': 'Event cancelled successfully',
             'event_id': str(event.id),
             'event_title': event.title,
             'new_status': event.status
@@ -3423,18 +3461,16 @@ class UpdateEventScoreView(APIView):
 
         try:
             event_uuid = UUID(str(event_id))
-        except ValueError:
+            event = Event.objects.get(id=event_uuid)
+        except (ValueError, TypeError, ValidationError):
             return Response({'error': 'Invalid event_id format'}, status=status.HTTP_400_BAD_REQUEST)
+        except Event.DoesNotExist:
+            return Response({'error': 'Event not found'}, status=status.HTTP_404_NOT_FOUND)
 
         try:
             user_profile = request.user.userprofile
         except (AttributeError, UserProfile.DoesNotExist):
             return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        try:
-            event = Event.objects.get(id=event_uuid)
-        except Event.DoesNotExist:
-            return Response({'error': 'Event not found'}, status=status.HTTP_404_NOT_FOUND)
 
         # Check if the authenticated user is the host of the event
         if user_profile != event.host:
