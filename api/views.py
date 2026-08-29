@@ -529,15 +529,20 @@ class CancelJoinEventView(APIView):
             except UserProfile.DoesNotExist:
                 return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
 
+            team_fields = [
+                'team_a_members', 'team_b_members', 'team_c_members', 'team_d_members',
+                'team_e_members', 'team_f_members', 'team_g_members', 'team_h_members'
+            ]
+
             # Check that the user is a member of the event
-            if user not in event.team_a_members.all() and user not in event.team_b_members.all():
+            if not any(user in getattr(event, team).all() for team in team_fields):
                 return Response({'error': 'User is not a member of the event'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Remove the user from the event teams if present
-            if user in event.team_a_members.all():
-                event.team_a_members.remove(user)
-            if user in event.team_b_members.all():
-                event.team_b_members.remove(user)
+            for team in team_fields:
+                team_rel = getattr(event, team)
+                if user in team_rel.all():
+                    team_rel.remove(user)
 
             # Create a cancellation record for this event
             EventCancellation.objects.create(
@@ -760,10 +765,14 @@ class CopyEventView(APIView):
         new_event = Event.objects.create(**new_event_data)
         
         # Copy ManyToMany relationships from the original event
-        if original_event.team_a_members.exists():
-            new_event.team_a_members.set(original_event.team_a_members.all())
-        if original_event.team_b_members.exists():
-            new_event.team_b_members.set(original_event.team_b_members.all())
+        team_fields = [
+            'team_a_members', 'team_b_members', 'team_c_members', 'team_d_members',
+            'team_e_members', 'team_f_members', 'team_g_members', 'team_h_members'
+        ]
+        for team in team_fields:
+            orig_team = getattr(original_event, team)
+            if orig_team.exists():
+                getattr(new_event, team).set(orig_team.all())
         
         # Serialize the new event for the response
         serializer = CopyEventSerializer(new_event)
@@ -2378,11 +2387,15 @@ class KickUserFromEventView(APIView):
         if request.user.userprofile != event.host:
             return Response({'error': 'Only the host can perform this action.'}, status=status.HTTP_403_FORBIDDEN)
 
-        # Remove the user from Team A and Team B
-        if user_profile in event.team_a_members.all():
-            event.team_a_members.remove(user_profile)
-        if user_profile in event.team_b_members.all():
-            event.team_b_members.remove(user_profile)
+        # Remove the user from all teams (Team A through H)
+        team_fields = [
+            'team_a_members', 'team_b_members', 'team_c_members', 'team_d_members',
+            'team_e_members', 'team_f_members', 'team_g_members', 'team_h_members'
+        ]
+        for team in team_fields:
+            team_rel = getattr(event, team)
+            if user_profile in team_rel.all():
+                team_rel.remove(user_profile)
 
         # Add the user to the removed_players list
         event.removed_players.add(user_profile)
