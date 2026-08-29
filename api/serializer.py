@@ -139,6 +139,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class EventSerializer(serializers.ModelSerializer):
             host_details = serializers.SerializerMethodField(read_only=True)
+            didijoined = serializers.SerializerMethodField(read_only=True)
             team_a_members = UserProfileSerializer(many=True, read_only=True)
             team_b_members = UserProfileSerializer(many=True, read_only=True)
             team_c_members = UserProfileSerializer(many=True, read_only=True)
@@ -190,6 +191,26 @@ class EventSerializer(serializers.ModelSerializer):
                     }
                 return None
             
+            def get_didijoined(self, obj):
+                request = self.context.get('request')
+                if not request or not hasattr(request, 'user') or not request.user.is_authenticated:
+                    return False
+                try:
+                    user_profile = request.user.userprofile
+                except Exception:
+                    return False
+
+                team_fields = [
+                    'team_a_members', 'team_b_members', 'team_c_members', 'team_d_members',
+                    'team_e_members', 'team_f_members', 'team_g_members', 'team_h_members'
+                ]
+                for field_name in team_fields:
+                    team_rel = getattr(obj, field_name, None)
+                    if team_rel:
+                        if any(m.id == user_profile.id for m in team_rel.all()):
+                            return True
+                return False
+            
             def validate_teams_number(self, value):
                 if value is not None and (value < 1 or value > 8):
                     raise serializers.ValidationError("Teams number must be between 1 and 8.")
@@ -210,6 +231,7 @@ class EventSerializer(serializers.ModelSerializer):
 
 class EventSerializerEvent(serializers.ModelSerializer):
             host_details = serializers.SerializerMethodField(read_only=True)
+            didijoined = serializers.SerializerMethodField(read_only=True)
             team_a_members = UserProfileSerializer(many=True, read_only=True)
             team_b_members = UserProfileSerializer(many=True, read_only=True)
             team_c_members = UserProfileSerializer(many=True, read_only=True)
@@ -273,6 +295,26 @@ class EventSerializerEvent(serializers.ModelSerializer):
                         'profile_picture': None,
                         'error': 'Unable to load profile picture'
                     }
+
+            def get_didijoined(self, obj):
+                request = self.context.get('request')
+                if not request or not hasattr(request, 'user') or not request.user.is_authenticated:
+                    return False
+                try:
+                    user_profile = request.user.userprofile
+                except Exception:
+                    return False
+
+                team_fields = [
+                    'team_a_members', 'team_b_members', 'team_c_members', 'team_d_members',
+                    'team_e_members', 'team_f_members', 'team_g_members', 'team_h_members'
+                ]
+                for field_name in team_fields:
+                    team_rel = getattr(obj, field_name, None)
+                    if team_rel:
+                        if any(m.id == user_profile.id for m in team_rel.all()):
+                            return True
+                return False
 
             def validate(self, data):
                 if 'start_time' in data and 'end_time' in data:

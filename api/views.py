@@ -326,7 +326,7 @@ class EventView(APIView):
         # Get all available events without excluding joined events
         events = Event.objects.filter(status='Available')
         
-        serializer = EventSerializer(events, many=True)
+        serializer = EventSerializer(events, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
