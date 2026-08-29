@@ -3284,6 +3284,12 @@ class EventDataV2View(APIView):
                 }
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+        # Check if requester is the host of the event
+        try:
+            amithehost = (request.user.userprofile == event.host)
+        except Exception:
+            amithehost = False
+
         # Prepare response data
         # The event_stats is fetched with the event
         data = {
@@ -3291,6 +3297,7 @@ class EventDataV2View(APIView):
             'reviews': event.host_reviews.all(),
             'event_stats': event.event_stats,  # This includes the status via the serializer
             'requester_data': request.user.userprofile,  # Authenticated requester's profile
+            'amithehost': amithehost,
         }
         
         # Serialize the data

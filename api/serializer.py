@@ -892,6 +892,22 @@ class EventDataV2Serializer(serializers.Serializer):
     reviews = EventDataV2ReviewSerializer(many=True)
     event_stats = EventDataV2StatsSerializer()
     requester_data = EventDataV2RequesterSerializer()
+    amithehost = serializers.SerializerMethodField()
+
+    def get_amithehost(self, obj):
+        if isinstance(obj, dict) and 'amithehost' in obj:
+            return obj['amithehost']
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return False
+        try:
+            event = obj.get('event') if isinstance(obj, dict) else getattr(obj, 'event', None)
+            if event and hasattr(event, 'host'):
+                return request.user.userprofile == event.host
+        except Exception:
+            return False
+        return False
+
 
 
 # ==============================================
